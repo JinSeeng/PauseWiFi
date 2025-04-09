@@ -1,0 +1,119 @@
+.main-header {
+    background-color: white;
+    box-shadow: var(--box-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.logo a {
+    display: flex;
+    align-items: center;
+    color: var(--dark-color);
+}
+
+.logo img {
+    height: 42px;
+    margin-right: 12px;
+    transition: var(--transition);
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    transition: var(--transition);
+}
+
+.logo a:hover img {
+    transform: scale(1.05);
+}
+
+.logo a:hover h1 {
+    color: var(--primary-color);
+}
+
+.main-nav ul {
+    display: flex;
+    align-items: center;
+}
+
+.main-nav li {
+    margin-left: 1.5rem;
+    position: relative;
+}
+
+.main-nav a {
+    color: var(--dark-color);
+    font-weight: 500;
+    padding: 0.5rem 0;
+    position: relative;
+}
+
+.main-nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: var(--primary-color);
+}
+
+.main-nav a:hover::after {
+    width: 100%;
+}
+
+.main-nav i {
+    margin-right: 7px;
+}
+
+.language-switcher {
+    margin-left: 1.5rem;
+}
+
+.language-switcher select {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+    color: var(--dark-color);
+    transition: var(--transition);
+}
+
+.language-switcher select:hover,
+.language-switcher select:focus {
+    border-color: var(--primary-color);
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--dark-color);
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: var(--transition);
+}
+
+.mobile-menu-toggle:hover {
+    color: var(--primary-color);
+}
