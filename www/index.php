@@ -1,77 +1,84 @@
 <?php
 require_once 'includes/config.php';
 require_once 'includes/db.php';
+
+$page_title = "Trouvez des spots Wi-Fi gratuits à Paris";
 require_once 'includes/header.php';
 ?>
 
-<main class="container">
-    <section class="hero">
-        <h1>Bienvenue sur <?= APP_NAME ?></h1>
-        <p class="lead">Trouvez des spots WiFi gratuits à Paris près des lieux d'intérêt</p>
+<section class="hero">
+    <div class="hero-content">
+        <h2>Trouvez des spots Wi-Fi gratuits à Paris</h2>
+        <p>Découvrez des lieux avec accès Wi-Fi près de parcs, musées, bibliothèques et autres lieux d'intérêt.</p>
         
         <form action="search.php" method="get" class="search-form">
-            <div class="form-row">
-                <div class="col-md-6 mb-3">
-                    <label for="arrondissement">Arrondissement</label>
-                    <select class="form-control" id="arrondissement" name="arrondissement">
-                        <option value="">Tous les arrondissements</option>
-                        <?php for ($i = 1; $i <= 20; $i++): ?>
-                            <option value="<?= $i ?>"><?= $i ?>e arrondissement</option>
-                        <?php endfor; ?>
-                    </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="type">Type de lieu</label>
-                    <select class="form-control" id="type" name="type">
-                        <option value="">Tous les types</option>
-                        <option value="bibliotheque">Bibliothèque</option>
-                        <option value="parc">Parc/Jardin</option>
-                        <option value="musee">Musée</option>
-                        <option value="mairie">Mairie</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <input type="text" name="q" placeholder="Rechercher par arrondissement, lieu...">
+                <button type="submit"><i class="fas fa-search"></i></button>
             </div>
-            <button type="submit" class="btn btn-primary">Rechercher</button>
         </form>
-    </section>
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature">
+        <i class="fas fa-wifi"></i>
+        <h3>Wi-Fi gratuit</h3>
+        <p>Accès à des centaines de spots Wi-Fi gratuits dans tout Paris.</p>
+    </div>
     
-    <section class="mt-5">
-        <h2>Derniers spots ajoutés</h2>
-        <div class="row" id="latest-spots">
-            <!-- Les spots seront chargés en AJAX -->
+    <div class="feature">
+        <i class="fas fa-map-marked-alt"></i>
+        <h3>Localisation précise</h3>
+        <p>Trouvez facilement les spots sur notre carte interactive.</p>
+    </div>
+    
+    <div class="feature">
+        <i class="fas fa-route"></i>
+        <h3>Itinéraires</h3>
+        <p>Planifiez votre trajet vers les meilleurs spots Wi-Fi.</p>
+    </div>
+</section>
+
+<section class="recent-spots">
+    <h2>Derniers spots ajoutés</h2>
+    
+    <div class="spots-grid">
+        <!-- Ces données seront dynamiques avec PHP plus tard -->
+        <div class="spot-card">
+            <div class="spot-image" style="background-image: url('https://via.placeholder.com/300x200')"></div>
+            <div class="spot-info">
+                <h3>Bibliothèque François Truffaut</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 14 Rue des Prouvaires, 75001</p>
+                <p><i class="fas fa-wifi"></i> Opérationnel</p>
+                <a href="spot.php?id=1" class="btn">Voir détails</a>
+            </div>
         </div>
-    </section>
-</main>
+        
+        <div class="spot-card">
+            <div class="spot-image" style="background-image: url('https://via.placeholder.com/300x200')"></div>
+            <div class="spot-info">
+                <h3>Parc de Belleville</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 47 Rue des Couronnes, 75020</p>
+                <p><i class="fas fa-wifi"></i> Opérationnel</p>
+                <a href="spot.php?id=2" class="btn">Voir détails</a>
+            </div>
+        </div>
+        
+        <div class="spot-card">
+            <div class="spot-image" style="background-image: url('https://via.placeholder.com/300x200')"></div>
+            <div class="spot-info">
+                <h3>Musée Carnavalet</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 23 Rue de Sévigné, 75003</p>
+                <p><i class="fas fa-wifi"></i> Opérationnel</p>
+                <a href="spot.php?id=3" class="btn">Voir détails</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center">
+        <a href="map.php" class="btn btn-large">Voir tous les spots sur la carte</a>
+    </div>
+</section>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Chargement des derniers spots
-    fetch('api/spots.php?limit=3')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('latest-spots');
-            if (data.success && data.data.length > 0) {
-                data.data.forEach(spot => {
-                    container.innerHTML += `
-                        <div class="col-md-4 mb-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">${spot.site_name}</h5>
-                                    <p class="card-text">${spot.address}, ${spot.postal_code}</p>
-                                    <a href="spot.php?id=${spot.id}" class="btn btn-sm btn-primary">Voir détails</a>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                container.innerHTML = '<p class="col-12">Aucun spot disponible pour le moment.</p>';
-            }
-        })
-        .catch(error => console.error('Error:', error));
-});
-</script>
-
-<?php
-require_once 'includes/footer.php';
-?>
+<?php require_once 'includes/footer.php'; ?>
