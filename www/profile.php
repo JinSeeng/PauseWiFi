@@ -1,111 +1,91 @@
 <?php
-require_once 'includes/config.php';
-require_once 'includes/db.php';
+$pageTitle = "Profil";
+require_once 'includes/header.php';
 require_once 'includes/auth.php';
 
-// Vérifier si l'utilisateur est connecté
-checkAuthentication();
+if (!isLoggedIn()) {
+    header('Location: login.php');
+    exit;
+}
 
-$page_title = "Mon profil";
-require_once 'includes/header.php';
+require_once 'includes/db.php';
 
-// Ici on récupérera les infos de l'utilisateur depuis la base de données
-// Pour l'instant, on simule des données
-$user = [
-    'username' => 'johndoe',
-    'email' => 'john.doe@example.com',
-    'created_at' => '2023-01-15 10:30:00'
-];
+// Récupérer les informations de l'utilisateur
+$stmt = $pdo->prepare("SELECT username, email, created_at FROM users WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$user = $stmt->fetch();
+
+// Récupérer les favoris
+$stmt = $pdo->prepare("
+    SELECT s.* FROM wifi_spots s
+    JOIN user_favorites uf ON s.id = uf.spot_id
+    WHERE uf.user_id = ?
+");
+$stmt->execute([$_SESSION['user_id']]);
+$favorites = $stmt->fetchAll();
 ?>
 
-<section class="profile-section">
+<section class="profile">
     <div class="container">
-        <h1>Mon profil</h1>
+        <h1>Profil de <?= htmlspecialchars($user['username']) ?></h1>
         
-        <?php if (isset($_GET['updated'])): ?>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> Votre profil a été mis à jour avec succès
-            </div>
-        <?php endif; ?>
-        
-        <div class="profile-content">
-            <div class="profile-info">
-                <div class="profile-header">
-                    <div class="avatar">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <h2><?php echo htmlspecialchars($user['username']); ?></h2>
-                    <p>Membre depuis <?php echo date('d/m/Y', strtotime($user['created_at'])); ?></p>
-                </div>
+        <div class="profile-info">
+            <div class="info-card">
+                <h2>Informations personnelles</h2>
+                <p><strong>Nom d'utilisateur:</strong> <?= htmlspecialchars($user['username']) ?></p>
+                <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
+                <p><strong>Membre depuis:</strong> <?= date('d/m/Y', strtotime($user['created_at'])) ?></p>
                 
-                <div class="profile-details">
-                    <h3>Informations personnelles</h3>
-                    <ul>
-                        <li>
-                            <span class="label"><i class="fas fa-envelope"></i> Email :</span>
-                            <span class="value"><?php echo htmlspecialchars($user['email']); ?></span>
-                        </li>
-                        <li>
-                            <span class="label"><i class="fas fa-calendar-alt"></i> Dernière connexion :</span>
-                            <span class="value">Aujourd'hui à 14:30</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">12</span>
-                        <span class="stat-label">Favoris</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">5</span>
-                        <span class="stat-label">Recherches récentes</span>
-                    </div>
-                </div>
+                <a href="logout.php" class="btn btn-logout">Déconnexion</a>
             </div>
             
-            <div class="profile-actions">
-                <div class="action-card">
-                    <h3><i class="fas fa-user-edit"></i> Modifier mon profil</h3>
-                    <form action="update_profile.php" method="post">
-                        <div class="form-group">
-                            <label for="email">Nouvel email</label>
-                            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="current_password">Mot de passe actuel</label>
-                            <input type="password" id="current_password" name="current_password" placeholder="Pour confirmer les changements">
-                        </div>
-                        
-                        <button type="submit" class="btn">Mettre à jour</button>
-                    </form>
-                </div>
+            <div class="favorites-card">
+                <h2>Vos spots favoris</h2>
                 
-                <div class="action-card">
-                    <h3><i class="fas fa-lock"></i> Changer mon mot de passe</h3>
-                    <form action="change_password.php" method="post">
-                        <div class="form-group">
-                            <label for="current_password_p">Mot de passe actuel</label>
-                            <input type="password" id="current_password_p" name="current_password" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="new_password">Nouveau mot de passe</label>
-                            <input type="password" id="new_password" name="new_password" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="confirm_new_password">Confirmer le nouveau mot de passe</label>
-                            <input type="password" id="confirm_new_password" name="confirm_new_password" required>
-                        </div>
-                        
-                        <button type="submit" class="btn">Changer le mot de passe</button>
-                    </form>
-                </div>
+                <?php if (empty($favorites)): ?>
+                    <p>Vous n'avez aucun spot en favoris.</p>
+                <?php else: ?>
+                    <div class="favorites-list">
+                        <?php foreach ($favorites as $spot): ?>
+                            <div class="favorite-item">
+                                <h3><?= htmlspecialchars($spot['nom_du_site']) ?></h3>
+                                <p><?= htmlspecialchars($spot['adresse']) ?>, <?= $spot['code_postal'] ?></p>
+                                <a href="spot.php?id=<?= $spot['id'] ?>" class="btn btn-small">Voir le spot</a>
+                                <button class="btn btn-small btn-remove-favorite" data-spot-id="<?= $spot['id'] ?>">
+                                    Retirer
+                                </button>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion de la suppression des favoris
+    document.querySelectorAll('.btn-remove-favorite').forEach(button => {
+        button.addEventListener('click', function() {
+            const spotId = this.getAttribute('data-spot-id');
+            
+            fetch('api/toggle_favorite.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ spot_id: spotId, action: 'remove' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.closest('.favorite-item').remove();
+                }
+            });
+        });
+    });
+});
+</script>
 
 <?php require_once 'includes/footer.php'; ?>

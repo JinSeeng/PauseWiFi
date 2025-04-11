@@ -1,63 +1,72 @@
 <?php
-// www/favorites.php
-require_once 'includes/config.php';
-require_once 'includes/db.php';
+$pageTitle = "Favoris";
+require_once 'includes/header.php';
 require_once 'includes/auth.php';
 
-checkAuthentication();
+if (!isLoggedIn()) {
+    header('Location: login.php');
+    exit;
+}
 
-$page_title = "Mes favoris";
-require_once 'includes/header.php';
+require_once 'includes/db.php';
 
-$db = new Database();
-$conn = $db->getConnection();
-
-// Récupérer les favoris de l'utilisateur
-$stmt = $conn->prepare("SELECT s.* FROM favorites f 
-                       JOIN wifi_spots s ON f.wifi_spot_id = s.id 
-                       WHERE f.user_id = ? 
-                       ORDER BY f.created_at DESC");
+// Récupérer les favoris
+$stmt = $pdo->prepare("
+    SELECT s.* FROM wifi_spots s
+    JOIN user_favorites uf ON s.id = uf.spot_id
+    WHERE uf.user_id = ?
+");
 $stmt->execute([$_SESSION['user_id']]);
 $favorites = $stmt->fetchAll();
 ?>
 
-<section class="favorites-section">
+<section class="favorites">
     <div class="container">
-        <h1>Mes spots Wi-Fi favoris</h1>
+        <h1>Vos spots Wi-Fi favoris</h1>
         
-        <?php if (isset($_GET['removed'])): ?>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> Le spot a été retiré de vos favoris
+        <?php if (empty($favorites)): ?>
+            <div class="no-favorites">
+                <p>Vous n'avez aucun spot en favoris pour le moment.</p>
+                <a href="map.php" class="btn">Explorer les spots</a>
             </div>
-        <?php endif; ?>
-        
-        <div class="favorites-list">
-            <?php if (empty($favorites)): ?>
-                <div class="no-favorites">
-                    <div class="empty-state">
-                        <i class="fas fa-heart-broken"></i>
-                        <h3>Aucun favoris pour le moment</h3>
-                        <p>Ajoutez des spots Wi-Fi à vos favoris pour les retrouver facilement.</p>
-                        <a href="search.php" class="btn">Rechercher des spots</a>
-                    </div>
-                </div>
-            <?php else: ?>
+        <?php else: ?>
+            <div class="favorites-grid">
                 <?php foreach ($favorites as $spot): ?>
-                    <div class="favorite-item">
-                        <div class="favorite-info">
-                            <h3><a href="spot.php?id=<?php echo $spot['id']; ?>"><?php echo htmlspecialchars($spot['name']); ?></a></h3>
-                            <p class="address"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($spot['address']); ?>, <?php echo htmlspecialchars($spot['postal_code']); ?> Paris</p>
-                            <p class="status"><i class="fas fa-wifi"></i> <?php echo htmlspecialchars($spot['status']); ?></p>
-                        </div>
-                        <div class="favorite-actions">
-                            <a href="map.php?spot=<?php echo $spot['id']; ?>" class="btn btn-outline"><i class="fas fa-map"></i> Voir sur la carte</a>
-                            <a href="remove_favorite.php?id=<?php echo $spot['id']; ?>" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Retirer</a>
-                        </div>
+                    <div class="favorite-spot">
+                        <?php include 'templates/spot_card.php'; ?>
+                        <button class="btn-remove-favorite" data-spot-id="<?= $spot['id'] ?>">
+                            Retirer des favoris
+                        </button>
                     </div>
                 <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion de la suppression des favoris
+    document.querySelectorAll('.btn-remove-favorite').forEach(button => {
+        button.addEventListener('click', function() {
+            const spotId = this.getAttribute('data-spot-id');
+            
+            fetch('api/toggle_favorite.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ spot_id: spotId, action: 'remove' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.closest('.favorite-spot').remove();
+                }
+            });
+        });
+    });
+});
+</script>
 
 <?php require_once 'includes/footer.php'; ?>

@@ -1,53 +1,46 @@
 <?php
-function sanitizeInput($data) {
-    return htmlspecialchars(strip_tags(trim($data)));
-}
+require_once 'db.php';
 
-function redirect($url) {
-    header("Location: $url");
-    exit;
-}
-
-function displayError($message) {
-    echo "<div class='alert alert-danger'>$message</div>";
-}
-
-function displaySuccess($message) {
-    echo "<div class='alert alert-success'>$message</div>";
-}
-
-function validateCoordinates($lat, $lng) {
-    return is_numeric($lat) && is_numeric($lng) && 
-           $lat >= -90 && $lat <= 90 && 
-           $lng >= -180 && $lng <= 180;
-}
-
-function parseGeoPoint($geoPoint) {
-    if (preg_match('/^(\d+\.\d+),\s*(\d+\.\d+)$/', $geoPoint, $matches)) {
-        return [
-            'latitude' => $matches[1],
-            'longitude' => $matches[2]
-        ];
-    }
-    return false;
-}
-
+/**
+ * Calcule la distance entre deux points géographiques
+ */
 function calculateDistance($lat1, $lon1, $lat2, $lon2) {
-    $earthRadius = 6371; // km
-    
+    $earthRadius = 6371; // Rayon de la Terre en km
+
     $dLat = deg2rad($lat2 - $lat1);
     $dLon = deg2rad($lon2 - $lon1);
-    
+
     $a = sin($dLat/2) * sin($dLat/2) + 
          cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * 
          sin($dLon/2) * sin($dLon/2);
-    
     $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-    
+
     return $earthRadius * $c;
 }
 
-function isFileAllowed($filename, $allowedTypes) {
-    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    return in_array($ext, $allowedTypes);
+/**
+ * Nettoie les données utilisateur
+ */
+function sanitizeInput($data) {
+    return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
+
+/**
+ * Récupère tous les spots Wi-Fi
+ */
+function getAllWifiSpots() {
+    global $pdo;
+    $stmt = $pdo->query("SELECT * FROM wifi_spots WHERE etat = 'Opérationnel'");
+    return $stmt->fetchAll();
+}
+
+/**
+ * Récupère un spot Wi-Fi par son ID
+ */
+function getWifiSpotById($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM wifi_spots WHERE id = ?");
+    $stmt->execute([$id]);
+    return $stmt->fetch();
+}
+?>
