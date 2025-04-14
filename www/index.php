@@ -1,55 +1,108 @@
 <?php
-$pageTitle = "Accueil";
-require_once 'includes/header.php';
-require_once 'includes/functions.php';
+declare(strict_types=1);
 
-$spots = getAllWifiSpots();
-?>
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/models/WifiSpot.php';
+require_once __DIR__ . '/models/User.php';
+require_once __DIR__ . '/models/Favorite.php';
+require_once __DIR__ . '/controllers/WifiSpotController.php';
+require_once __DIR__ . '/controllers/AuthController.php';
 
-<div class="hero">
-    <div class="container">
-        <h1>Trouvez des spots Wi-Fi gratuits à Paris</h1>
-        <p>Découvrez des lieux avec accès Wi-Fi près des parcs, musées et autres points d'intérêt</p>
-        <?php include 'templates/search_form.php'; ?>
-    </div>
-</div>
+if (session_status() === PHP_SESSION_NONE) {
+    session_start([
+        'cookie_lifetime' => 86400,
+        'read_and_close'  => false,
+    ]);
+}
 
-<section class="featured-spots">
-    <div class="container">
-        <h2>Spots populaires</h2>
-        <div class="spots-grid">
-            <?php 
-            // Afficher les 6 premiers spots
-            $featuredSpots = array_slice($spots, 0, 6);
-            foreach ($featuredSpots as $spot): 
-                include 'templates/spot_card.php';
-            endforeach; 
-            ?>
-        </div>
-    </div>
-</section>
+$db = Database::getInstance();
+$wifiSpotModel = new WifiSpot($db);
+$userModel = new User($db);
+$favoriteModel = new Favorite($db);
 
-<section class="how-it-works">
-    <div class="container">
-        <h2>Comment ça marche ?</h2>
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <h3>Recherchez</h3>
-                <p>Trouvez un spot Wi-Fi par arrondissement ou type de lieu</p>
-            </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <h3>Localisez</h3>
-                <p>Consultez la carte pour voir les spots à proximité</p>
-            </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <h3>Profitez</h3>
-                <p>Connectez-vous gratuitement et découvrez les lieux autour</p>
-            </div>
-        </div>
-    </div>
-</section>
+$wifiController = new WifiSpotController($wifiSpotModel, $favoriteModel);
+$authController = new AuthController($userModel);
 
-<?php require_once 'includes/footer.php'; ?>
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$requestMethod = $_SERVER['REQUEST_METHOD'];
+
+try {
+    switch ($requestUri) {
+        case '/':
+        case '/home':
+            $wifiController->mapView();
+            break;
+
+        case '/list':
+            $wifiController->index(); // Affiche la liste des spots
+            break;
+
+        case (preg_match('#^/spot/(\d+)$#', $requestUri, $matches) ? true : false):
+            $wifiController->show((int)$matches[1]);
+            break;
+
+        case '/search':
+            $wifiController->search();
+            break;
+
+        case '/login':
+            if ($requestMethod === 'POST') {
+                $authController->login();
+            } else {
+                require __DIR__ . '/views/login.php';
+            }
+            break;
+
+        case '/register':
+            if ($requestMethod === 'POST') {
+                $authController->register();
+            } else {
+                require __DIR__ . '/views/register.php';
+            }
+            break;
+
+        case '/logout':
+            $authController->logout();
+            break;
+
+        case '/favorites':
+            if (!isset($_SESSION['user_id'])) {
+                header('Location: /login');
+                exit;
+            }
+            require __DIR__ . '/views/profile.php';
+            break;
+
+        case '/api/toggle-favorite':
+            if ($requestMethod === 'POST' && isset($_SESSION['user_id'])) {
+                $spotId = (int)($_POST['spot_id'] ?? 0);
+                $favoriteModel->toggleFavorite($_SESSION['user_id'], $spotId);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true]);
+                exit;
+            }
+            http_response_code(401);
+            break;
+
+        case '/not-found':
+            http_response_code(404);
+            require __DIR__ . '/views/not_found.php';
+            break;
+
+        default:
+            if (file_exists(__DIR__ . $requestUri)) {
+                return false;
+            }
+            http_response_code(404);
+            require __DIR__ . '/views/not_found.php';
+            break;
+    }
+} catch (PDOException $e) {
+    error_log('Database error: ' . $e->getMessage());
+    http_response_code(500);
+    require __DIR__ . '/views/errors/server_error.php';
+} catch (Exception $e) {
+    error_log('Error: ' . $e->getMessage());
+    http_response_code(500);
+    require __DIR__ . '/views/errors/server_error.php';
+}
