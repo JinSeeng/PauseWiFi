@@ -29,7 +29,7 @@ Le projet utilise une architecture MVC modifiée et s'appuie sur un jeu de donn�
 ---
 
 ## Structure du projet
-
+```bash
 PauseWiFi/
 │
 ├── www/                        # Racine du site web
@@ -116,7 +116,7 @@ PauseWiFi/
 │
 ├── pause_wifi.sql              # Fichier SQL (structure + données)
 └── README.md                   # Présentation du projet
-
+```
 ---
 
 ## Ressources
