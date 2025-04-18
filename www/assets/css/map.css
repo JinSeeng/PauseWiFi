@@ -1,0 +1,147 @@
+.map-page {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.map-page__filters {
+    margin-bottom: 2rem;
+}
+
+.map-page__search-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.map-page__search-input {
+    padding: 0.9rem 1.2rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.map-page__search-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.map-page__filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.map-page__filter {
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.map-page__filter:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.map-page__search-btn, .map-page__locate-btn {
+    padding: 0.9rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    border: none;
+}
+
+.map-page__search-btn {
+    background: #3498db;
+    color: white;
+}
+
+.map-page__search-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+.map-page__locate-btn {
+    background: #f8f9fa;
+    color: #2c3e50;
+    border: 1px solid #ddd;
+}
+
+.map-page__locate-btn:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.map-page__container {
+    height: 600px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.map-page__map {
+    height: 100%;
+    width: 100%;
+}
+
+.map-page__user-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3498db;
+    font-size: 1.2rem;
+}
+
+.leaflet-popup-content {
+    min-width: 200px;
+}
+
+.leaflet-popup-content h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.leaflet-popup-content p {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.btn-details {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    background: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-details:hover {
+    background: #2980b9;
+}
+
+@media (max-width: 768px) {
+    .map-page {
+        padding: 1.5rem;
+    }
+    
+    .map-page__container {
+        height: 400px;
+    }
+}

@@ -1,66 +1,80 @@
-// assets/js/map.js
-
 let map;
 let markers;
+let userMarker = null;
 
 function initMap() {
-    // Coordonnées par défaut (centre de Paris)
     const defaultCoords = [48.8566, 2.3522];
     const defaultZoom = 13;
     
-    // Initialiser la carte
     map = L.map('map').setView(defaultCoords, defaultZoom);
     
-    // Ajouter le calque OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+    
+    // Chargement initial
+    const params = new URLSearchParams(window.location.search);
+    if (params.toString()) {
+        fetch(`/?page=search&${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateMap(data);
+        });
+    }
 }
 
-function updateMap(spots) {
-    // Supprimer les marqueurs existants
+window.updateMap = function(spots) {
     if (markers) {
         map.removeLayer(markers);
     }
 
-    // Créer un nouveau groupe de marqueurs
     markers = L.markerClusterGroup();
     
-    // Ajouter les marqueurs pour chaque spot
     spots.forEach(spot => {
         const marker = L.marker([spot.latitude, spot.longitude])
             .bindPopup(`
                 <h3>${spot.site_name}</h3>
                 <p>${spot.address}</p>
                 <p>Arrondissement ${spot.arrondissement}</p>
+                ${spot.distance ? `<p>À ${Math.round(spot.distance * 1000)} mètres</p>` : ''}
                 <p>Status: ${spot.status}</p>
-                <a href="/spot/${spot.id}" class="btn-details">Voir détails</a>
+                <a href="/?page=spot&id=${spot.id}" class="btn-details">Voir détails</a>
             `);
         
         markers.addLayer(marker);
     });
     
-    // Ajouter les marqueurs à la carte
     map.addLayer(markers);
     
-    // Ajuster la vue pour afficher tous les marqueurs
     if (spots.length > 0) {
         if (spots.length === 1) {
             map.setView([spots[0].latitude, spots[0].longitude], 15);
         } else {
-            map.fitBounds(markers.getBounds());
+            const bounds = markers.getBounds();
+            // Si on a un marqueur utilisateur, on l'inclut dans le zoom
+            if (userMarker) {
+                bounds.extend(userMarker.getLatLng());
+            }
+            map.fitBounds(bounds);
         }
     }
 }
 
-// Initialiser la carte de détail si nécessaire
 document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('map')) {
+        initMap();
+    }
+    
     if (document.getElementById('detail-map') && typeof spotData !== 'undefined') {
         initDetailMap();
     }
 });
 
-function initDetailMap() {
+function initSpotDetailMap() {
     const mapElement = document.getElementById('detail-map');
     
     if (!mapElement || !spotData) return;
@@ -86,3 +100,13 @@ function initDetailMap() {
         radius: 100
     }).addTo(map);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('map')) {
+        initMap();
+    }
+    
+    if (document.getElementById('detail-map') && typeof spotData !== 'undefined') {
+        initSpotDetailMap();
+    }
+});

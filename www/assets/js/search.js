@@ -1,84 +1,88 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const searchForm = document.getElementById('search-form');
-    
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            performSearch();
-        });
-        
-        const inputs = searchForm.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            input.addEventListener('change', performSearch);
-        });
-    }
-});
-
-function performSearch() {
+function getSearchParams() {
     const searchForm = document.getElementById('search-form');
     const formData = new FormData(searchForm);
     const params = new URLSearchParams();
     
     for (const [key, value] of formData.entries()) {
-        if (value) params.append(key, value);
+        if (value && value !== 'all') {
+            params.append(key, value);
+        }
     }
     
-    fetch(`/search?${params.toString()}`, {
+    return params;
+}
+
+function updateUrlWithSearchParams() {
+    const params = getSearchParams();
+    const currentPage = document.body.dataset.currentPage || 'list';
+    window.history.pushState({}, '', `/?page=${currentPage}&${params.toString()}`);
+}
+
+function performSearch() {
+    const params = getSearchParams();
+    
+    fetch(`/?page=search&${params.toString()}`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
     .then(response => response.json())
     .then(data => {
-        updateSearchResults(data);
+        // Vérifier si l'utilisateur est admin
+        const isAdmin = document.querySelector('.user-greeting')?.textContent.includes('Admin');
+        
+        if (typeof updateSearchResults === 'function') {
+            // Passer l'information isAdmin à la fonction d'affichage
+            updateSearchResults(data, isAdmin);
+        }
+        
+        if (typeof updateMap === 'function') {
+            updateMap(data, isAdmin);
+        }
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
 
-function updateSearchResults(spots) {
-    const spotsList = document.getElementById('spots-list');
+// Initialisation commune
+function initSearchForm() {
+    const searchForm = document.getElementById('search-form');
     
-    if (!spotsList) return;
-    
-    if (spots.length === 0) {
-        spotsList.innerHTML = '<p class="no-results">Aucun spot WiFi trouvé avec ces critères.</p>';
-        return;
+    if (searchForm) {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        ['search', 'arrondissement', 'status', 'site_type'].forEach(param => {
+            const element = searchForm.querySelector(`[name="${param}"]`);
+            if (element && urlParams.has(param)) {
+                element.value = urlParams.get(param);
+            }
+        });
+        
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            updateUrlWithSearchParams();
+            performSearch();
+        });
+        
+        const inputs = searchForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                updateUrlWithSearchParams();
+                performSearch();
+            });
+        });
+        
+        if (urlParams.toString()) {
+            performSearch();
+        }
     }
-    
-    let html = '';
-    
-    spots.forEach(spot => {
-        html += `
-            <div class="spot-card">
-                <div class="spot-info">
-                    <h2>${spot.site_name}</h2>
-                    <p class="address">${spot.address}, ${spot.postal_code}</p>
-                    <p class="arrondissement">Arrondissement ${spot.arrondissement}</p>
-                    <p class="status ${spot.status.toLowerCase().replace(/ /g, '-')}">
-                        ${spot.status}
-                    </p>
-                    <p class="bornes">${spot.num_bornes} borne(s)</p>
-                </div>
-                
-                <div class="spot-actions">
-                    <a href="/spot/${spot.id}" class="btn-details">Voir détails</a>
-                    ${isUserLoggedIn() ? `
-                        <button class="btn-favorite ${spot.isFavorite ? 'active' : ''}" 
-                                data-spot-id="${spot.id}">
-                            ♥
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    });
-    
-    spotsList.innerHTML = html;
-    initFavoriteButtons();
 }
 
-function isUserLoggedIn() {
-    return document.querySelector('.user-greeting') !== null;
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const body = document.body;
+    const page = new URLSearchParams(window.location.search).get('page') || 'list';
+    body.dataset.currentPage = page;
+    
+    initSearchForm();
+});
