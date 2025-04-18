@@ -12,7 +12,6 @@ Le projet utilise une architecture MVC modifiée et s'appuie sur un jeu de donn�
 - Espace utilisateur avec inscription et connexion
 - Ajout de spots en favoris
 - Espace administrateur sécurisé avec CRUD sur les spots
-- Multilingue (Français / Anglais)
 - Téléversement de fichiers possible
 - Mots de passe sécurisés (hash)
 - Sécurité renforcée (requêtes préparées, validation…)
