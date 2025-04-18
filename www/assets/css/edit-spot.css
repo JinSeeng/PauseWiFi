@@ -1,0 +1,124 @@
+.edit-spot {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.edit-spot__title {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.edit-spot__alert {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.edit-spot__alert--error {
+    background: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.edit-spot__form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.edit-spot__form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.edit-spot__label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.95rem;
+}
+
+.edit-spot__input, .edit-spot__select {
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.edit-spot__input:focus, .edit-spot__select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.edit-spot__form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.edit-spot__submit, .edit-spot__cancel {
+    padding: 0.9rem 1.8rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.edit-spot__submit {
+    background: #3498db;
+    color: white;
+    border: none;
+}
+
+.edit-spot__submit:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+.edit-spot__cancel {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #ddd;
+    text-decoration: none;
+}
+
+.edit-spot__cancel:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.edit-spot__form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .edit-spot {
+        padding: 1.5rem;
+    }
+    
+    .edit-spot__form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .edit-spot__form-actions {
+        flex-direction: column;
+    }
+    
+    .edit-spot__submit, .edit-spot__cancel {
+        width: 100%;
+    }
+}
