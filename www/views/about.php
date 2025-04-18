@@ -1,48 +1,60 @@
 <?php require_once __DIR__ . '/partials/header.php'; ?>
 
 <div class="about">
-    <h1 class="about__title">À propos de Pause WiFi</h1>
-    
+    <h1 class="about__title">À propos de Pause Wi-Fi</h1>
+
     <section class="about__section">
         <h2 class="about__section-title">Notre mission</h2>
         <p class="about__section-text">
-            Pause WiFi a été créé pour aider les Parisiens et visiteurs à trouver facilement 
-            des spots WiFi gratuits dans la ville. Notre objectif est de faciliter votre 
-            connexion où que vous soyez dans Paris.
+            Pause Wi-Fi est un site web conçu pour vous permettre de <strong>trouver facilement des points d'accès Wi-Fi gratuits à Paris</strong>. Que vous soyez en déplacement, étudiant, en télétravail ou simplement curieux, notre objectif est de vous aider à rester connecté à tout moment.
         </p>
     </section>
-    
+
     <section class="about__section">
-        <h2 class="about__section-title">Comment ça marche ?</h2>
+        <h2 class="about__section-title">Ce que le site propose</h2>
         <p class="about__section-text">
-            Notre plateforme recense tous les points d'accès WiFi publics à Paris. 
-            Vous pouvez rechercher des spots par arrondissement, type de lieu ou statut, 
-            les visualiser sur une carte interactive, et enregistrer vos favoris pour 
-            un accès rapide.
+            Le site met à disposition :
         </p>
+        <ul class="about__section-text">
+            <li>Une <strong>carte interactive</strong> qui affiche tous les spots Wi-Fi gratuits disponibles à Paris</li>
+            <li>Une <strong>recherche avancée</strong> par arrondissement, accessibilité, et type de lieu</li>
+            <li>La possibilité de <strong>gérer vos favoris</strong> pour retrouver facilement vos lieux préférés</li>
+            <li>Un <strong>espace personnel</strong> pour modifier vos informations et suivre vos activités</li>
+            <li>Une interface claire, intuitive, et <strong>adaptée à tous les appareils</strong></li>
+        </ul>
     </section>
-    
+
     <section class="about__section">
-        <h2 class="about__section-title">Nos données</h2>
+        <h2 class="about__section-title">Données utilisées</h2>
         <p class="about__section-text">
-            Les informations sur les spots WiFi proviennent de sources officielles de la 
-            Ville de Paris et sont mises à jour régulièrement. Si vous constatez une 
-            erreur ou un spot manquant, n'hésitez pas à nous contacter.
+            Les données sont issues de la plateforme <strong>Open Data Paris</strong> et enrichies pour offrir une meilleure expérience utilisateur. Cela permet une information actualisée et fiable sur les points Wi-Fi publics disponibles.
         </p>
     </section>
-    
+
+    <section class="about__section">
+        <h2 class="about__section-title">Pour qui est-ce utile ?</h2>
+        <p class="about__section-text">
+            Pause Wi-Fi s’adresse à :
+        </p>
+        <ul class="about__section-text">
+            <li>Les <strong>étudiants</strong> en quête d’un lieu pour travailler en ligne</li>
+            <li>Les <strong>freelances ou télétravailleurs</strong> souhaitant une connexion fiable</li>
+            <li>Les <strong>touristes et habitants</strong> qui veulent se connecter gratuitement en ville</li>
+        </ul>
+    </section>
+
     <section class="about__section about__team">
-        <h2 class="about__section-title">L'équipe</h2>
+        <h2 class="about__section-title">À propos du projet</h2>
         <p class="about__section-text">
-            Pause WiFi est développé et maintenu par une petite équipe passionnée par 
-            les technologies et la ville de Paris. Nous croyons en un accès libre et 
-            facile à internet pour tous.
+            Ce site a été réalisé dans le cadre d’une <strong>épreuve certifiante en apprentissage de développement web</strong>. Le projet a été entièrement conçu, développé et structuré par une étudiante passionnée, dans le but de combiner <strong>utilité, accessibilité et design</strong>.
         </p>
     </section>
-    
+
     <div class="about__cta">
-        <a href="/?page=contact" class="about__cta-btn">Nous contacter</a>
+        <p class="about__section-text">
+            Vous avez une suggestion ou une question ? Rendez-vous sur la <a href="/?page=contact" class="about__cta-btn">page de contact</a> !
+        </p>
     </div>
-</div>
+</main>
 
 <?php require_once __DIR__ . '/partials/footer.php'; ?>
