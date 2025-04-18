@@ -1,6 +1,4 @@
 <?php
-// config/db.php
-
 class Database {
     private static $instance = null;
     private $connection;
@@ -19,7 +17,8 @@ class Database {
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->connection->exec("SET NAMES 'utf8'");
         } catch (PDOException $e) {
-            die("Erreur de connexion à la base de données: " . $e->getMessage());
+            error_log("Database connection error: " . $e->getMessage());
+            die("Erreur de connexion à la base de données. Veuillez réessayer plus tard.");
         }
     }
     
