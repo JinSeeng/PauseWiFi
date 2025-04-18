@@ -1,22 +1,27 @@
 <?php
+// Inclusion des fichiers nécessaires
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/ActivityLog.php';
 
+// Démarrage de la session
 session_start();
 
+// Initialisation des objets
 $db = Database::getInstance();
 $userModel = new User($db);
 $activityLog = new ActivityLog($db);
 
-$errors = [];
+$errors = []; // Tableau pour stocker les erreurs
 
+// Vérification si le formulaire a été soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupération des données du formulaire
     $token = $_POST['token'] ?? '';
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
     
-    // Valider le token
+    // Validation du token de réinitialisation
     $query = "SELECT id FROM users WHERE reset_token = :token AND reset_expires > UNIX_TIMESTAMP()";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':token', $token);
@@ -27,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Lien invalide ou expiré";
     }
     
+    // Validation du mot de passe
     if (empty($password)) {
         $errors[] = "Le mot de passe est requis";
     } elseif (!$userModel->isPasswordStrong($password)) {
@@ -37,16 +43,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Les mots de passe ne correspondent pas";
     }
     
+    // Si aucune erreur de validation
     if (empty($errors)) {
+        // Hashage du nouveau mot de passe
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
-        // Mettre à jour le mot de passe et effacer le token
+        // Mise à jour du mot de passe et suppression du token
         $query = "UPDATE users SET password = :password, reset_token = NULL, reset_expires = NULL WHERE id = :id";
         $stmt = $db->prepare($query);
         $stmt->bindParam(':password', $hashedPassword);
         $stmt->bindParam(':id', $user['id'], PDO::PARAM_INT);
         
         if ($stmt->execute()) {
+            // Journalisation de l'action
             $activityLog->logAction(
                 $user['id'],
                 'password_reset_success',
@@ -63,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Stocker les erreurs pour affichage
+// Stockage des erreurs et redirection
 $_SESSION['reset_errors'] = $errors;
 $_SESSION['reset_token'] = $_GET['token'] ?? '';
 header('Location: /?page=forgot-password&token=' . urlencode($_GET['token'] ?? ''));

@@ -1,28 +1,34 @@
 <?php
+// Inclusion des fichiers nécessaires
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/ActivityLog.php';
 
+// Démarrage de la session
 session_start();
 
+// Vérification si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
     header('Location: /?page=login');
     exit;
 }
 
+// Initialisation des objets
 $db = Database::getInstance();
 $userModel = new User($db);
 $activityLog = new ActivityLog($db);
 
-$errors = [];
+$errors = []; // Tableau pour stocker les erreurs
 
+// Vérification si le formulaire a été soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupération des données du formulaire
     $currentPassword = $_POST['current_password'];
     $newPassword = $_POST['new_password'];
     $confirmPassword = $_POST['confirm_password'];
     $userId = $_SESSION['user_id'];
 
-    // Validation
+    // Validation des champs
     if (empty($currentPassword)) {
         $errors[] = "Le mot de passe actuel est requis";
     }
@@ -37,13 +43,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Les nouveaux mots de passe ne correspondent pas";
     }
 
+    // Si aucune erreur de validation
     if (empty($errors)) {
-        // Vérifier le mot de passe actuel
+        // Vérification du mot de passe actuel
         $user = $userModel->getUserById($userId);
         if ($user && password_verify($currentPassword, $user['password'])) {
-            // Mettre à jour le mot de passe
+            // Hashage du nouveau mot de passe
             $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            
+            // Mise à jour du mot de passe
             if ($userModel->updatePassword($userId, $hashedPassword)) {
+                // Journalisation du changement
                 $activityLog->logAction(
                     $userId,
                     'password_changed',
@@ -63,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Stocker les erreurs et rediriger
+// Stockage des erreurs et redirection
 $_SESSION['password_errors'] = $errors;
 header('Location: /?page=profile');
 exit;

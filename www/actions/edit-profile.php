@@ -1,27 +1,33 @@
 <?php
+// Inclusion des fichiers nécessaires
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/ActivityLog.php';
 
+// Démarrage de la session
 session_start();
 
+// Vérification si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
     header('Location: /?page=login');
     exit;
 }
 
+// Initialisation des objets
 $db = Database::getInstance();
 $userModel = new User($db);
 $activityLog = new ActivityLog($db);
 
-$errors = [];
+$errors = []; // Tableau pour stocker les erreurs
 
+// Vérification si le formulaire a été soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupération et nettoyage des données
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $currentUserId = $_SESSION['user_id'];
 
-    // Validation
+    // Validation des champs
     if (empty($username)) {
         $errors[] = "Le nom d'utilisateur est requis";
     } elseif (strlen($username) < 3) {
@@ -34,18 +40,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "L'email n'est pas valide";
     }
 
+    // Si aucune erreur de validation
     if (empty($errors)) {
-        // Vérifier si l'email existe déjà pour un autre utilisateur
+        // Vérification si l'email est déjà utilisé par un autre utilisateur
         $existingUser = $userModel->getUserByEmail($email);
         if ($existingUser && $existingUser['id'] != $currentUserId) {
             $errors[] = "Un compte existe déjà avec cet email";
         } else {
-            // Mettre à jour le profil
+            // Mise à jour du profil
             if ($userModel->updateUserProfile($currentUserId, $username, $email)) {
-                // Mettre à jour les données de session
+                // Mise à jour des données en session
                 $_SESSION['username'] = $username;
                 $_SESSION['email'] = $email;
 
+                // Journalisation de la modification
                 $activityLog->logAction(
                     $currentUserId,
                     'profile_updated',
@@ -63,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Stocker les erreurs et rediriger
+// Stockage des erreurs et redirection
 $_SESSION['profile_errors'] = $errors;
 $_SESSION['old_profile'] = $_POST;
 header('Location: /?page=profile');

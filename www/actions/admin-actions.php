@@ -1,26 +1,33 @@
 <?php
+// Inclusion des fichiers nécessaires
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/WifiSpot.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/ActivityLog.php';
 
+// Démarrage de la session
 session_start();
 
+// Vérification des droits admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: /?page=login');
     exit;
 }
 
+// Initialisation des objets
 $db = Database::getInstance();
 $wifiSpotModel = new WifiSpot($db);
 $userModel = new User($db);
 $activityLog = new ActivityLog($db);
 
+// Récupération de l'action demandée
 $action = $_GET['action'] ?? '';
 $errors = [];
 
+// Gestion des différentes actions admin
 switch ($action) {
     case 'create-spot':
+        // Création d'un nouveau spot WIFI
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
                 'site_name' => $_POST['site_name'],
@@ -36,6 +43,7 @@ switch ($action) {
             ];
             
             if ($wifiSpotModel->createSpot($data)) {
+                // Journalisation de la création
                 $activityLog->logAction(
                     $_SESSION['user_id'],
                     'spot_created',
@@ -51,9 +59,11 @@ switch ($action) {
         exit;
         
     case 'delete-spot':
+        // Suppression d'un spot WIFI
         $id = (int)($_GET['id'] ?? 0);
         if ($id > 0) {
             if ($wifiSpotModel->deleteSpot($id)) {
+                // Journalisation de la suppression
                 $activityLog->logAction(
                     $_SESSION['user_id'],
                     'spot_deleted',
@@ -69,11 +79,13 @@ switch ($action) {
         exit;
         
     case 'update-user-role':
+        // Modification du rôle d'un utilisateur
         $id = (int)($_GET['id'] ?? 0);
         $role = $_POST['role'] ?? 'user';
         
         if ($id > 0 && in_array($role, ['user', 'admin'])) {
             if ($userModel->updateUserRole($id, $role)) {
+                // Journalisation du changement de rôle
                 $activityLog->logAction(
                     $_SESSION['user_id'],
                     'user_role_updated',
@@ -89,9 +101,11 @@ switch ($action) {
         exit;
         
     case 'delete-user':
+        // Suppression d'un utilisateur
         $id = (int)($_GET['id'] ?? 0);
         if ($id > 0 && $id !== $_SESSION['user_id']) {
             if ($userModel->deleteUser($id)) {
+                // Journalisation de la suppression
                 $activityLog->logAction(
                     $_SESSION['user_id'],
                     'user_deleted',
@@ -107,6 +121,7 @@ switch ($action) {
         exit;
         
     default:
+        // Redirection par défaut vers l'admin
         header('Location: /?page=admin');
         exit;
 }
