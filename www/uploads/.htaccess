@@ -1,0 +1,7 @@
+# Interdire l'accès direct aux fichiers
+<FilesMatch "\.(php|php5|phtml)$">
+    Deny from all
+</FilesMatch>
+
+# Empêcher le listing des répertoires
+Options -Indexes
