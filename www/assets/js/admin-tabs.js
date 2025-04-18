@@ -1,13 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion du chargement initial
+    // Gestion du chargement initial de la page admin
     const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab') || 'welcome';
+    const tab = urlParams.get('tab') || 'welcome'; // Récupère l'onglet actif depuis l'URL
     
-    // Cache tous les contenus et montre seulement celui qui correspond
+    // Cache tous les contenus et montre seulement celui qui correspond à l'onglet
     document.querySelectorAll('.admin-content > div').forEach(content => {
         content.style.display = 'none';
     });
     
+    // Trouve le contenu à afficher selon l'onglet
     const activeContent = document.querySelector(`.admin-content > .${tab}-management, 
                                                .admin-content > .${tab}-form,
                                                .admin-content > .welcome-message`);
@@ -20,11 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Mettre à jour l'URL sans recharger la page
+            // Met à jour l'URL sans recharger la page
             const tabName = this.getAttribute('href').split('tab=')[1];
             window.history.pushState({}, '', `/?page=admin&tab=${tabName}`);
             
-            // Mettre à jour l'affichage
+            // Met à jour l'affichage du contenu
             document.querySelectorAll('.admin-content > div').forEach(content => {
                 content.style.display = 'none';
             });
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 contentToShow.style.display = 'block';
             }
             
-            // Mettre à jour les boutons actifs
+            // Met à jour l'état actif des boutons
             document.querySelectorAll('.menu-btn').forEach(b => {
                 b.classList.remove('active');
             });
@@ -49,10 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Prépare les données du formulaire
             const formData = new FormData(this);
             const action = this.getAttribute('action');
             const method = this.getAttribute('method') || 'POST';
             
+            // Envoie la requête AJAX
             fetch(action, {
                 method: method,
                 body: formData
@@ -92,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <button class="close-alert">&times;</button>
         `;
         
+        // Ajoute l'alerte au DOM
         const container = document.querySelector('.admin-container');
         if (container) {
             container.insertBefore(alertDiv, container.firstChild);
@@ -101,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alertDiv.remove();
             });
             
-            // Disparition automatique
+            // Disparition automatique après 5 secondes
             setTimeout(() => {
                 alertDiv.style.opacity = '0';
                 setTimeout(() => {
@@ -111,11 +115,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Gestion du popstate (navigation avant/arrière)
+    // Gestion de la navigation avant/arrière
     window.addEventListener('popstate', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const tab = urlParams.get('tab') || 'welcome';
         
+        // Met à jour l'affichage selon l'onglet
         document.querySelectorAll('.admin-content > div').forEach(content => {
             content.style.display = 'none';
         });
@@ -127,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             activeContent.style.display = 'block';
         }
         
-        // Mettre à jour les boutons actifs
+        // Met à jour les boutons actifs
         document.querySelectorAll('.menu-btn').forEach(btn => {
             btn.classList.remove('active');
             if (btn.getAttribute('href').includes(`tab=${tab}`)) {

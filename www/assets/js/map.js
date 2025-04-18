@@ -2,17 +2,20 @@ let map;
 let markers;
 let userMarker = null;
 
+// Initialise la carte principale
 function initMap() {
-    const defaultCoords = [48.8566, 2.3522];
+    const defaultCoords = [48.8566, 2.3522]; // Coordonnées par défaut (Paris)
     const defaultZoom = 13;
     
+    // Crée la carte Leaflet
     map = L.map('map').setView(defaultCoords, defaultZoom);
     
+    // Ajoute la couche de tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributeurs'
     }).addTo(map);
     
-    // Chargement initial
+    // Charge les données initiales si des paramètres existent dans l'URL
     const params = new URLSearchParams(window.location.search);
     if (params.toString()) {
         fetch(`/?page=search&${params.toString()}`, {
@@ -27,13 +30,17 @@ function initMap() {
     }
 }
 
+// Met à jour la carte avec les spots
 window.updateMap = function(spots) {
+    // Supprime les marqueurs existants
     if (markers) {
         map.removeLayer(markers);
     }
 
+    // Crée un groupe de marqueurs
     markers = L.markerClusterGroup();
     
+    // Ajoute chaque spot comme marqueur
     spots.forEach(spot => {
         const marker = L.marker([spot.latitude, spot.longitude])
             .bindPopup(`
@@ -50,12 +57,14 @@ window.updateMap = function(spots) {
     
     map.addLayer(markers);
     
+    // Ajuste la vue de la carte
     if (spots.length > 0) {
         if (spots.length === 1) {
+            // Zoom sur un seul spot
             map.setView([spots[0].latitude, spots[0].longitude], 15);
         } else {
+            // Zoom pour voir tous les spots
             const bounds = markers.getBounds();
-            // Si on a un marqueur utilisateur, on l'inclut dans le zoom
             if (userMarker) {
                 bounds.extend(userMarker.getLatLng());
             }
@@ -64,27 +73,20 @@ window.updateMap = function(spots) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('map')) {
-        initMap();
-    }
-    
-    if (document.getElementById('detail-map') && typeof spotData !== 'undefined') {
-        initDetailMap();
-    }
-});
-
+// Initialise la carte de détail d'un spot
 function initSpotDetailMap() {
     const mapElement = document.getElementById('detail-map');
     
     if (!mapElement || !spotData) return;
     
+    // Crée une carte centrée sur le spot
     const map = L.map(mapElement).setView([spotData.latitude, spotData.longitude], 15);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributeurs'
     }).addTo(map);
 
+    // Ajoute le marqueur du spot
     const marker = L.marker([spotData.latitude, spotData.longitude])
         .addTo(map)
         .bindPopup(`
@@ -93,6 +95,7 @@ function initSpotDetailMap() {
         `)
         .openPopup();
     
+    // Ajoute un cercle autour du spot
     L.circle([spotData.latitude, spotData.longitude], {
         color: '#0066cc',
         fillColor: '#0066cc',
@@ -101,6 +104,7 @@ function initSpotDetailMap() {
     }).addTo(map);
 }
 
+// Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('map')) {
         initMap();

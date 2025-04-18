@@ -4,12 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const html = document.documentElement;
     
     if (menuToggle && mainNav) {
-        // Gestion du clic sur le toggle
+        // Gestion du clic sur le bouton menu mobile
         menuToggle.addEventListener('click', function() {
             mainNav.classList.toggle('active');
             this.classList.toggle('is-active');
             
-            // Bloquer le scroll du body quand le menu est ouvert
+            // Bloque le scroll quand le menu est ouvert
             if (mainNav.classList.contains('active')) {
                 html.style.overflow = 'hidden';
                 this.setAttribute('aria-expanded', 'true');
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Fermer le menu au clic sur un lien
+        // Ferme le menu au clic sur un lien
         const navLinks = mainNav.querySelectorAll('a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Fermer le menu en cliquant à l'extérieur
+        // Ferme le menu en cliquant à l'extérieur
         document.addEventListener('click', function(e) {
             if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
                 mainNav.classList.remove('active');
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Fermer le menu avec la touche Escape
+        // Ferme le menu avec la touche Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && mainNav.classList.contains('active')) {
                 mainNav.classList.remove('active');

@@ -7,20 +7,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = this.querySelector('input[name="password"]');
             let isValid = true;
             
-            clearErrors(this);
+            clearErrors(this); // Nettoie les erreurs précédentes
             
+            // Validation de l'email
             if (!email.value || !isValidEmail(email.value)) {
                 showError(email, 'Veuillez entrer une adresse email valide');
                 isValid = false;
             }
             
+            // Validation du mot de passe
             if (!password.value) {
                 showError(password, 'Le mot de passe est requis');
                 isValid = false;
             }
             
             if (!isValid) {
-                e.preventDefault();
+                e.preventDefault(); // Empêche l'envoi si invalide
             }
         });
     }
@@ -37,21 +39,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             clearErrors(this);
             
+            // Validation du nom d'utilisateur
             if (!username.value || username.value.length < 3) {
                 showError(username, 'Le nom d\'utilisateur doit contenir au moins 3 caractères');
                 isValid = false;
             }
             
+            // Validation de l'email
             if (!email.value || !isValidEmail(email.value)) {
                 showError(email, 'Veuillez entrer une adresse email valide');
                 isValid = false;
             }
             
+            // Validation du mot de passe
             if (!password.value || password.value.length < 6) {
                 showError(password, 'Le mot de passe doit contenir au moins 6 caractères');
                 isValid = false;
             }
             
+            // Vérification de la correspondance des mots de passe
             if (password.value !== confirmPassword.value) {
                 showError(confirmPassword, 'Les mots de passe ne correspondent pas');
                 isValid = false;
@@ -64,10 +70,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Affiche un message d'erreur pour un champ
 function showError(input, message) {
     const formGroup = input.closest('.form-group');
     if (!formGroup) return;
     
+    // Crée ou réutilise l'élément d'erreur
     let errorElement = formGroup.querySelector('.error-message');
     if (!errorElement) {
         errorElement = document.createElement('div');
@@ -79,6 +87,7 @@ function showError(input, message) {
     input.classList.add('error');
 }
 
+// Nettoie tous les messages d'erreur
 function clearErrors(form) {
     const errorMessages = form.querySelectorAll('.error-message');
     errorMessages.forEach(el => el.remove());
@@ -87,6 +96,7 @@ function clearErrors(form) {
     errorInputs.forEach(input => input.classList.remove('error'));
 }
 
+// Vérifie si un email est valide
 function isValidEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);

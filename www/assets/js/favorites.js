@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Déléguer les événements de favoris
+    // Gestion déléguée des clics sur les favoris
     document.addEventListener('click', function(e) {
         const btnFavorite = e.target.closest('.btn-favorite');
         if (btnFavorite) {
             e.preventDefault();
             
-            // Vérifier si l'utilisateur est connecté
+            // Vérifie si l'utilisateur est connecté
             if (!document.querySelector('.user-greeting')) {
                 window.location.href = '/?page=login';
                 return;
@@ -15,10 +15,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Fonction pour supprimer un favori
     function removeFavorite(spotId) {
         const formData = new FormData();
         formData.append('spot_id', spotId);
-        formData.append('action', 'remove'); // Explicitement demander une suppression
+        formData.append('action', 'remove'); // Demande explicite de suppression
     
         fetch('/actions/toggle-favorite.php', {
             method: 'POST',
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (response.status === 401) {
-                showLoginModal(); // Afficher une modal au lieu de rediriger
+                showLoginModal(); // Affiche une modal si non connecté
                 return Promise.reject('login_required');
             }
             return response.json();
@@ -45,12 +46,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Gère le clic sur un bouton favori
     function handleFavoriteClick(button) {
         const spotId = button.dataset.spotId;
         const formData = new FormData();
         formData.append('spot_id', spotId);
 
-        button.disabled = true;
+        button.disabled = true; // Désactive le bouton pendant la requête
         
         fetch('/actions/toggle-favorite.php', {
             method: 'POST',
@@ -67,8 +69,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (!data.error) {
+                // Met à jour l'apparence du bouton
                 button.classList.toggle('active', data.is_favorite);
-                // Feedback visuel
                 button.innerHTML = data.is_favorite ? '♥' : '♡';
             } else if (data.error) {
                 alert(data.error);
@@ -79,8 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Une erreur est survenue');
         })
         .finally(() => {
-            button.disabled = false;
+            button.disabled = false; // Réactive le bouton
         });
     }
-        
 });
