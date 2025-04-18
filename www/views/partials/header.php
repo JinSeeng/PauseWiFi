@@ -2,8 +2,10 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-?>
 
+// Déterminer la page active
+$currentPage = $_GET['page'] ?? 'home';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -12,60 +14,99 @@ if (session_status() === PHP_SESSION_NONE) {
     <title>Pause WiFi - Trouvez des spots WiFi gratuits à Paris</title>
     <meta name="description" content="Localisez les meilleurs spots WiFi gratuits à Paris">
     
-    <!-- Feuilles de style CSS -->
-    <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="stylesheet" href="/assets/css/header.css">
-    <link rel="stylesheet" href="/assets/css/footer.css">
-    <link rel="stylesheet" href="/assets/css/spots.css">
-    <link rel="stylesheet" href="/assets/css/responsive.css">
+    <!-- CSS de base et utilitaires -->
+    <link rel="stylesheet" href="/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/header_footer.css">
+
+    <!-- CSS des pages spécifiques -->
     <link rel="stylesheet" href="/assets/css/home.css">
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossorigin=""/>
-    
-    <!-- Leaflet MarkerCluster CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="/assets/css/auth.css">
+    <link rel="stylesheet" href="/assets/css/map.css">
+    <link rel="stylesheet" href="/assets/css/list.css">
+    <link rel="stylesheet" href="/assets/css/spot-detail.css">
+    <link rel="stylesheet" href="/assets/css/favorites.css">
+    <link rel="stylesheet" href="/assets/css/about.css">
+    <link rel="stylesheet" href="/assets/css/contact.css">
+    <link rel="stylesheet" href="/assets/css/admin.css">
+    <link rel="stylesheet" href="/assets/css/edit-spot.css">
+    <link rel="stylesheet" href="/assets/css/not_found.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
+
+    <!-- Librairies externes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
-    
-    <!-- Favicon -->
     <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
-    
-    <!-- Préchargement des polices -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
-    <header class="main-header">
-        <div class="container">
-            <div class="logo">
-                <a href="/" aria-label="Accueil">
-                    <img src="/assets/img/logo.png" alt="Pause WiFi Logo" width="40" height="40">
-                    <span>Pause WiFi</span>
+    <header class="header">
+        <div class="header__container">
+            <div class="header__logo">
+                <a href="/?page=home" class="header__logo-link" aria-label="Accueil">
+                    <img src="/assets/img/logo.png" alt="Pause WiFi Logo" class="header__logo-img" width="40" height="40">
+                    <span class="header__logo-text">Pause WiFi</span>
                 </a>
             </div>
             
-            <nav class="main-nav" aria-label="Navigation principale">
-                <ul>
-                    <li><a href="/">Carte</a></li> <!-- Maintenant pointe vers la carte -->
-                    <li><a href="/list">Liste des spots</a></li> <!-- Nouveau lien -->
+            <nav class="header__nav" aria-label="Navigation principale">
+                <ul class="header__nav-list">
+                    <li class="header__nav-item <?= $currentPage === 'home' ? 'header__nav-item--active' : '' ?>">
+                        <a href="/?page=home" class="header__nav-link">Accueil</a>
+                    </li>
+                    <li class="header__nav-item <?= $currentPage === 'map' ? 'header__nav-item--active' : '' ?>">
+                        <a href="/?page=map" class="header__nav-link">Carte</a>
+                    </li>
+                    <li class="header__nav-item <?= $currentPage === 'list' ? 'header__nav-item--active' : '' ?>">
+                        <a href="/?page=list" class="header__nav-link">Liste des spots</a>
+                    </li>
+                    
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <li><a href="/favorites">Mes Favoris</a></li>
                         <?php if ($_SESSION['role'] === 'admin'): ?>
-                            <li><a href="/admin">Admin</a></li>
+                            <li class="header__nav-item <?= $currentPage === 'admin' ? 'header__nav-item--active' : '' ?>">
+                                <a href="/?page=admin" class="header__nav-link">Dashboard</a>
+                            </li>
+                        <?php else: ?>
+                            <li class="header__nav-item <?= $currentPage === 'favorites' ? 'header__nav-item--active' : '' ?>">
+                                <a href="/?page=favorites" class="header__nav-link">Mes Favoris</a>
+                            </li>
                         <?php endif; ?>
-                        <li><a href="/logout">Déconnexion</a></li>
-                        <li class="user-greeting">Bonjour, <?= htmlspecialchars($_SESSION['username']) ?></li>
+                        
+                        <li class="header__nav-item">
+                            <a href="/logout.php" class="header__logout" aria-label="Déconnexion">
+                                <i class="fas fa-sign-out-alt header__logout-icon"></i>
+                            </a>
+                        </li>
+                        
+                        <li class="header__user <?= $_SESSION['role'] === 'admin' ? 'header__user--admin' : '' ?>">
+                            <?php
+                            $profilePicture = isset($_SESSION['user_id']) 
+                                ? $userModel->getProfilePicture($_SESSION['user_id'])
+                                : null;
+                            $picturePath = $profilePicture 
+                                ? '/uploads/profiles/' . htmlspecialchars($profilePicture)
+                                : '/assets/img/default-profile.png';
+                            ?>
+                            <a href="/?page=profile" class="header__user-link">
+                                <img src="<?= $picturePath ?>" alt="Photo de profil" class="header__user-img" 
+                                    onerror="this.src='/assets/img/default-profile.png'">
+                                <span class="header__user-name">Bonjour, <?= htmlspecialchars($_SESSION['username']) ?></span>
+                            </a>
+                        </li>
                     <?php else: ?>
-                        <li><a href="/login">Connexion</a></li>
-                        <li><a href="/register">Inscription</a></li>
+                        <li class="header__nav-item <?= $currentPage === 'login' ? 'header__nav-item--active' : '' ?>">
+                            <a href="/?page=login" class="header__nav-link">Connexion</a>
+                        </li>
+                        <li class="header__nav-item <?= $currentPage === 'register' ? 'header__nav-item--active' : '' ?>">
+                            <a href="/?page=register" class="header__nav-link">Inscription</a>
+                        </li>
                     <?php endif; ?>
                 </ul>
             </nav>
             
-            <button class="mobile-menu-toggle" aria-label="Menu mobile" aria-expanded="false">☰</button>
+            <button class="header__mobile-toggle" aria-label="Menu mobile" aria-expanded="false">
+                <span class="header__mobile-icon">☰</span>
+            </button>
         </div>
     </header>
 
-    <main class="container">
+    <main class="main">
