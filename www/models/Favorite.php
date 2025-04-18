@@ -1,13 +1,22 @@
 <?php
+/**
+ * Classe pour gérer les favoris des utilisateurs
+ */
 class Favorite {
-    private $db;
-    private $userModel;
+    private $db; // Connexion à la base de données
+    private $userModel; // Modèle utilisateur
     
     public function __construct($db) {
         $this->db = $db;
         $this->userModel = new User($db);
     }
     
+    /**
+     * Vérifie si un spot est dans les favoris d'un utilisateur
+     * @param int $userId - ID de l'utilisateur
+     * @param int $spotId - ID du spot WiFi
+     * @return bool - True si le spot est favori
+     */
     public function isFavorite($userId, $spotId) {
         try {
             $query = "SELECT COUNT(*) FROM favorites 
@@ -23,6 +32,12 @@ class Favorite {
         }
     }
     
+    /**
+     * Ajoute un spot aux favoris d'un utilisateur
+     * @param int $userId - ID de l'utilisateur
+     * @param int $spotId - ID du spot WiFi
+     * @return bool - True si l'ajout a réussi
+     */
     public function addFavorite($userId, $spotId) {
         try {
             // Empêcher les admins d'ajouter des favoris
@@ -46,6 +61,12 @@ class Favorite {
         }
     }
     
+    /**
+     * Supprime un spot des favoris d'un utilisateur
+     * @param int $userId - ID de l'utilisateur
+     * @param int $spotId - ID du spot WiFi
+     * @return bool - True si la suppression a réussi
+     */
     public function removeFavorite($userId, $spotId) {
         try {
             if ($this->userModel->isAdmin($userId)) {
@@ -68,6 +89,12 @@ class Favorite {
         }
     }
     
+    /**
+     * Alterne l'état favori d'un spot (ajoute ou supprime)
+     * @param int $userId - ID de l'utilisateur
+     * @param int $spotId - ID du spot WiFi
+     * @return string|bool - 'added'/'removed' si succès, false si échec
+     */
     public function toggleFavorite($userId, $spotId) {
         try {
             if ($this->userModel->isAdmin($userId)) {
@@ -85,6 +112,11 @@ class Favorite {
         }
     }
     
+    /**
+     * Récupère tous les favoris d'un utilisateur
+     * @param int $userId - ID de l'utilisateur
+     * @return array - Liste des spots favoris
+     */
     public function getUserFavorites($userId) {
         try {
             $query = "SELECT ws.* FROM wifi_spots ws
@@ -102,6 +134,11 @@ class Favorite {
         }
     }
 
+    /**
+     * Compte le nombre de favoris d'un utilisateur
+     * @param int $userId - ID de l'utilisateur
+     * @return int - Nombre de favoris
+     */
     public function countUserFavorites($userId) {
         try {
             $query = "SELECT COUNT(*) FROM favorites WHERE user_id = :user_id";
@@ -115,6 +152,13 @@ class Favorite {
         }
     }
     
+    /**
+     * Récupère les favoris paginés d'un utilisateur
+     * @param int $userId - ID de l'utilisateur
+     * @param int $page - Numéro de page
+     * @param int $perPage - Nombre d'éléments par page
+     * @return array - Liste des spots favoris pour la page demandée
+     */
     public function getUserFavoritesPaginated($userId, $page = 1, $perPage = 10) {
         try {
             $offset = ($page - 1) * $perPage;

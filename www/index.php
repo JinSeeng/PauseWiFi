@@ -1,24 +1,28 @@
 <?php
+// Inclusion des fichiers nécessaires
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/models/WifiSpot.php';
 require_once __DIR__ . '/models/User.php';
 require_once __DIR__ . '/models/Favorite.php';
 require_once __DIR__ . '/models/ActivityLog.php';
 
+// Démarrage de la session si elle n'est pas déjà active
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Initialisation des modèles
 $db = Database::getInstance();
 $wifiSpotModel = new WifiSpot($db);
 $userModel = new User($db);
 $favoriteModel = new Favorite($db);
 $activityLog = new ActivityLog($db);
 
-// Partie des requêtes AJAX
+// Traitement des requêtes AJAX
 if (isset($_GET['page']) && ($_GET['page'] === 'search' || $_GET['page'] === 'map-search')) {
     header('Content-Type: application/json');
     
+    // Paramètres de recherche
     $searchParams = [
         'search' => $_GET['search'] ?? '',
         'arrondissement' => $_GET['arrondissement'] ?? 'all',
@@ -27,12 +31,13 @@ if (isset($_GET['page']) && ($_GET['page'] === 'search' || $_GET['page'] === 'ma
     ];
     
     try {
+        // Recherche avec géolocalisation ou simple recherche
         if (isset($_GET['latitude']) && isset($_GET['longitude'])) {
             $spots = $wifiSpotModel->getNearbySpots(
                 (float)$_GET['latitude'],
                 (float)$_GET['longitude'],
                 null,
-                2, // Rayon de 2km
+                2,  // Rayon de 2km
                 20, // Limite à 20 résultats
                 $searchParams
             );
@@ -40,12 +45,12 @@ if (isset($_GET['page']) && ($_GET['page'] === 'search' || $_GET['page'] === 'ma
             $spots = $wifiSpotModel->searchSpots($searchParams);
         }
         
-        // Ajouter la propriété isFavorite si l'utilisateur est connecté et n'est pas admin
+        // Ajout de la propriété isFavorite pour les utilisateurs connectés (non admin)
         if (isset($_SESSION['user_id']) && $_SESSION['role'] !== 'admin') {
             foreach ($spots as &$spot) {
                 $spot['isFavorite'] = $favoriteModel->isFavorite($_SESSION['user_id'], $spot['id']);
             }
-            unset($spot); // Important pour éviter des problèmes de référence
+            unset($spot); // Nettoyage de la référence
         }
         
         echo json_encode($spots);
@@ -56,13 +61,13 @@ if (isset($_GET['page']) && ($_GET['page'] === 'search' || $_GET['page'] === 'ma
     exit;
 }
 
-// Détection de la page demandée
+// Détection de la page demandée (par défaut 'home')
 $page = $_GET['page'] ?? 'home';
 
-// Inclure le header
+// Inclusion du header
 require_once __DIR__ . '/views/partials/header.php';
 
-// Charger la page appropriée
+// Router : chargement de la page appropriée
 switch ($page) {
     case 'home':
         require __DIR__ . '/views/home.php';
@@ -73,6 +78,7 @@ switch ($page) {
         break;
         
     case 'list':
+        // Paramètres de recherche pour la liste
         $searchParams = [
             'search' => $_GET['search'] ?? '',
             'arrondissement' => $_GET['arrondissement'] ?? 'all',
@@ -81,13 +87,14 @@ switch ($page) {
         ];
         
         try {
+            // Recherche avec ou sans géolocalisation
             if (isset($_GET['latitude']) && isset($_GET['longitude'])) {
                 $spots = $wifiSpotModel->getNearbySpots(
                     (float)$_GET['latitude'],
                     (float)$_GET['longitude'],
                     null,
-                    2, // Rayon de 2km
-                    20, // Limite à 20 résultats
+                    2,
+                    20,
                     $searchParams
                 );
             } else {
@@ -103,6 +110,7 @@ switch ($page) {
         break;
         
     case 'spot':
+        // Affichage du détail d'un spot WiFi
         if (isset($_GET['id'])) {
             try {
                 $spotId = (int)$_GET['id'];
@@ -125,6 +133,7 @@ switch ($page) {
         break;
         
     case 'login':
+        // Gestion des erreurs de connexion
         $errors = $_SESSION['login_errors'] ?? [];
         $oldInput = $_SESSION['old_login'] ?? [];
         unset($_SESSION['login_errors']);
@@ -133,6 +142,7 @@ switch ($page) {
         break;
         
     case 'register':
+        // Gestion des erreurs d'inscription
         $errors = $_SESSION['register_errors'] ?? [];
         $oldInput = $_SESSION['old_register'] ?? [];
         unset($_SESSION['register_errors']);
@@ -145,6 +155,7 @@ switch ($page) {
         break;
         
     case 'profile':
+        // Page profil (réservée aux utilisateurs connectés)
         if (isset($_SESSION['user_id'])) {
             try {
                 $user = $userModel->getUserById($_SESSION['user_id']);
@@ -161,8 +172,10 @@ switch ($page) {
         break;
         
     case 'favorites':
+        // Page des favoris (réservée aux utilisateurs non admin)
         if (isset($_SESSION['user_id']) && $_SESSION['role'] !== 'admin') {
             try {
+                // Pagination des favoris
                 $pageNumber = max(1, (int)($_GET['page'] ?? 1));
                 $perPage = 10;
                 
@@ -191,6 +204,7 @@ switch ($page) {
         break;
         
     case 'admin':
+        // Tableau de bord admin (réservé aux administrateurs)
         if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin') {
             try {
                 $spots = $wifiSpotModel->getAllSpots();
@@ -209,6 +223,7 @@ switch ($page) {
         break;
         
     case 'edit-spot':
+        // Édition d'un spot (réservé aux administrateurs)
         if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin' && isset($_GET['id'])) {
             require __DIR__ . '/views/edit-spot.php';
         } else {
@@ -226,10 +241,11 @@ switch ($page) {
         break;
         
     default:
+        // Page non trouvée
         require __DIR__ . '/views/not_found.php';
         break;
 }
 
-// Inclure le footer
+// Inclusion du footer
 require_once __DIR__ . '/views/partials/footer.php';
 ?>

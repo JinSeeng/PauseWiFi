@@ -1,11 +1,18 @@
 <?php
+/**
+ * Classe pour gérer les spots WiFi
+ */
 class WifiSpot {
-    private $db;
+    private $db; // Connexion à la base de données
     
     public function __construct($db) {
         $this->db = $db;
     }
     
+    /**
+     * Récupère tous les spots WiFi
+     * @return array - Liste des spots
+     */
     public function getAllSpots() {
         $query = "SELECT * FROM wifi_spots ORDER BY site_name ASC";
         $stmt = $this->db->prepare($query);
@@ -13,6 +20,11 @@ class WifiSpot {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    /**
+     * Récupère un spot par son ID
+     * @param int $id - ID du spot
+     * @return array - Données du spot
+     */
     public function getSpotById($id) {
         $query = "SELECT * FROM wifi_spots WHERE id = :id";
         $stmt = $this->db->prepare($query);
@@ -21,31 +33,41 @@ class WifiSpot {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
+    /**
+     * Recherche des spots selon différents critères
+     * @param array $params - Paramètres de recherche
+     * @return array - Liste des spots correspondants
+     */
     public function searchSpots($params = []) {
         $query = "SELECT * FROM wifi_spots WHERE 1=1";
         $conditions = [];
         $bindValues = [];
         
+        // Filtre par texte de recherche
         if (!empty($params['search'])) {
             $conditions[] = "(site_name LIKE :search OR address LIKE :search)";
             $bindValues[':search'] = '%' . $params['search'] . '%';
         }
         
+        // Filtre par arrondissement
         if (!empty($params['arrondissement']) && $params['arrondissement'] !== 'all') {
             $conditions[] = "arrondissement = :arrondissement";
             $bindValues[':arrondissement'] = $params['arrondissement'];
         }
         
+        // Filtre par type de site
         if (!empty($params['site_type']) && $params['site_type'] !== 'all') {
             $conditions[] = "site_type = :site_type";
             $bindValues[':site_type'] = $params['site_type'];
         }
         
+        // Filtre par statut
         if (!empty($params['status']) && $params['status'] !== 'all') {
             $conditions[] = "status = :status";
             $bindValues[':status'] = $params['status'];
         }
         
+        // Ajout des conditions à la requête
         if (!empty($conditions)) {
             $query .= " AND " . implode(" AND ", $conditions);
         }
@@ -54,6 +76,7 @@ class WifiSpot {
         
         $stmt = $this->db->prepare($query);
         
+        // Liaison des valeurs
         foreach ($bindValues as $key => $value) {
             $stmt->bindValue($key, $value);
         }
@@ -62,7 +85,18 @@ class WifiSpot {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    /**
+     * Récupère les spots à proximité d'une position géographique
+     * @param float $latitude - Latitude de la position
+     * @param float $longitude - Longitude de la position
+     * @param int|null $excludeId - ID de spot à exclure
+     * @param float $radius - Rayon de recherche en km
+     * @param int $limit - Nombre maximum de résultats
+     * @param array $params - Paramètres de recherche supplémentaires
+     * @return array - Liste des spots à proximité
+     */
     public function getNearbySpots($latitude, $longitude, $excludeId = null, $radius = 1, $limit = 3, $params = []) {
+        // Requête avec calcul de distance (formule haversine)
         $query = "SELECT 
                     id,
                     site_name,
@@ -88,10 +122,12 @@ class WifiSpot {
                         SIN(RADIANS(latitude))
                     )) <= :radius";
         
+        // Exclusion d'un spot spécifique
         if ($excludeId !== null) {
             $query .= " AND id != :exclude_id";
         }
         
+        // Filtres supplémentaires
         if (!empty($params['search'])) {
             $query .= " AND (site_name LIKE :search OR address LIKE :search)";
         }
@@ -140,9 +176,16 @@ class WifiSpot {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Récupère des spots aléatoires
+     * @param array $excludeIds - IDs de spots à exclure
+     * @param int $limit - Nombre maximum de résultats
+     * @return array - Liste des spots aléatoires
+     */
     public function getRandomSpots($excludeIds = [], $limit = 5) {
         $query = "SELECT * FROM wifi_spots";
         
+        // Exclusion des spots spécifiés
         if (!empty($excludeIds)) {
             $query .= " WHERE id NOT IN (" . implode(',', array_fill(0, count($excludeIds), '?')) . ")";
         }
@@ -151,6 +194,7 @@ class WifiSpot {
         
         $stmt = $this->db->prepare($query);
         
+        // Liaison des valeurs pour les exclusions
         $i = 1;
         if (!empty($excludeIds)) {
             foreach ($excludeIds as $id) {
@@ -163,6 +207,11 @@ class WifiSpot {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    /**
+     * Récupère les spots les plus populaires (avec le plus de favoris)
+     * @param int $limit - Nombre maximum de résultats
+     * @return array - Liste des spots populaires
+     */
     public function getPopularSpots($limit = 5) {
         $query = "SELECT ws.*, COUNT(f.id) as favorite_count
                   FROM wifi_spots ws
@@ -178,6 +227,11 @@ class WifiSpot {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    /**
+     * Crée un nouveau spot WiFi
+     * @param array $data - Données du nouveau spot
+     * @return bool - True si la création a réussi
+     */
     public function createSpot($data) {
         $query = "INSERT INTO wifi_spots 
                  (site_name, address, postal_code, site_code, num_bornes, status, latitude, longitude, arrondissement) 
@@ -188,6 +242,12 @@ class WifiSpot {
         return $stmt->execute($data);
     }
     
+    /**
+     * Met à jour un spot WiFi existant
+     * @param int $id - ID du spot
+     * @param array $data - Nouvelles données
+     * @return bool - True si la mise à jour a réussi
+     */
     public function updateSpot($id, $data) {
         $query = "UPDATE wifi_spots SET 
             site_name = :site_name,
@@ -218,6 +278,11 @@ class WifiSpot {
         return $stmt->execute();
     }
     
+    /**
+     * Supprime un spot WiFi
+     * @param int $id - ID du spot
+     * @return bool - True si la suppression a réussi
+     */
     public function deleteSpot($id) {
         $query = "DELETE FROM wifi_spots WHERE id = :id";
         $stmt = $this->db->prepare($query);

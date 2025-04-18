@@ -1,12 +1,22 @@
 <?php
-
+/**
+ * Classe pour gérer les logs d'activité des utilisateurs
+ */
 class ActivityLog {
-    private $db;
+    private $db; // Connexion à la base de données
     
     public function __construct($db) {
         $this->db = $db;
     }
     
+    /**
+     * Enregistre une action dans les logs
+     * @param int $userId - ID de l'utilisateur
+     * @param string $action - Type d'action (ex: 'login', 'logout')
+     * @param string|null $details - Détails supplémentaires
+     * @param string|null $ipAddress - Adresse IP de l'utilisateur
+     * @return bool - True si l'insertion a réussi
+     */
     public function logAction($userId, $action, $details = null, $ipAddress = null) {
         $query = "INSERT INTO activity_logs (user_id, action, details, ip_address) 
                  VALUES (:user_id, :action, :details, :ip_address)";
@@ -20,6 +30,12 @@ class ActivityLog {
         return $stmt->execute();
     }
     
+    /**
+     * Récupère les logs d'un utilisateur spécifique
+     * @param int $userId - ID de l'utilisateur
+     * @param int $limit - Nombre maximum de logs à retourner
+     * @return array - Liste des logs
+     */
     public function getUserLogs($userId, $limit = 10) {
         $query = "SELECT * FROM activity_logs 
                  WHERE user_id = :user_id 
@@ -33,6 +49,11 @@ class ActivityLog {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    /**
+     * Récupère les logs récents de tous les utilisateurs
+     * @param int $limit - Nombre maximum de logs à retourner
+     * @return array - Liste des logs avec infos utilisateur
+     */
     public function getRecentLogs($limit = 50) {
         $query = "SELECT al.*, u.username 
                  FROM activity_logs al
