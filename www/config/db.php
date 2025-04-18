@@ -4,16 +4,14 @@ class Database {
     private $connection;
     
     private function __construct() {
-        $host = '127.0.0.1';
-        $port = '8889';
-        $dbname = 'pause_wifi';
-        $username = 'root';
-        $password = 'root';
-        $socket = '/Applications/MAMP/tmp/mysql/mysql.sock';
+        $host = 'mysql-sellianade.alwaysdata.net';
+        $dbname = 'sellianade_pause_wifi';
+        $user = '408839';
+        $password = 'bExwim-gasdiq-curqy6';
 
         try {
-            $dsn = "mysql:host=$host;port=$port;dbname=$dbname;unix_socket=$socket";
-            $this->connection = new PDO($dsn, $username, $password);
+            $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
+            $this->connection = new PDO($dsn, $user, $password);
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->connection->exec("SET NAMES 'utf8'");
         } catch (PDOException $e) {
