@@ -1,13 +1,17 @@
 <?php require_once __DIR__ . '/partials/header.php'; ?>
 
 <div class="map-page">
+    <!-- Section des filtres de recherche -->
     <div class="map-page__filters">
         <form id="search-form" class="map-page__search-form">
+            <!-- Champ de recherche par nom ou adresse -->
             <input type="text" name="search" class="map-page__search-input" 
                    placeholder="Rechercher par nom ou adresse..." 
                    value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
             
+            <!-- Ligne de filtres -->
             <div class="map-page__filter-row">
+                <!-- Filtre par type de site -->
                 <select name="site_type" class="map-page__filter">
                     <option value="all">Tous les types</option>
                     <option value="Bibliothèque" <?= ($_GET['site_type'] ?? '') === 'Bibliothèque' ? 'selected' : '' ?>>Bibliothèque</option>
@@ -19,6 +23,7 @@
                     <option value="Autre" <?= ($_GET['site_type'] ?? '') === 'Autre' ? 'selected' : '' ?>>Autre</option>
                 </select>
                 
+                <!-- Filtre par arrondissement -->
                 <select name="arrondissement" class="map-page__filter">
                     <option value="all">Tous les arrondissements</option>
                     <?php for ($i = 1; $i <= 20; $i++): ?>
@@ -28,6 +33,7 @@
                     <?php endfor; ?>
                 </select>
                 
+                <!-- Filtre par statut -->
                 <select name="status" class="map-page__filter">
                     <option value="all">Tous les statuts</option>
                     <option value="Opérationnel" <?= ($_GET['status'] ?? '') === 'Opérationnel' ? 'selected' : '' ?>>Opérationnel</option>
@@ -37,6 +43,7 @@
                 </select>
             </div>
             
+            <!-- Boutons d'action -->
             <button type="submit" class="map-page__search-btn">Rechercher</button>
             <button type="button" id="locate-me" class="map-page__locate-btn">
                 <i class="fas fa-location-arrow"></i> Me localiser
@@ -44,41 +51,48 @@
         </form>
     </div>
 
+    <!-- Conteneur de la carte -->
     <div class="map-page__container">
         <div id="map" class="map-page__map"></div>
     </div>
 </div>
 
 <script>
+// Script pour la géolocalisation de l'utilisateur
 document.addEventListener('DOMContentLoaded', function() {
     const locateBtn = document.getElementById('locate-me');
     let userMarker = null;
     
+    // Gestion du clic sur le bouton "Me localiser"
     locateBtn.addEventListener('click', function() {
+        // Vérification du support de la géolocalisation
         if (!navigator.geolocation) {
             alert("La géolocalisation n'est pas supportée par votre navigateur");
             return;
         }
         
+        // Affichage d'un indicateur de chargement
         locateBtn.disabled = true;
         locateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Localisation...';
         
+        // Récupération de la position actuelle
         navigator.geolocation.getCurrentPosition(
             function(position) {
+                // Création des coordonnées
                 const userLatLng = [
                     position.coords.latitude,
                     position.coords.longitude
                 ];
                 
-                // Supprimer l'ancien marqueur s'il existe
+                // Suppression de l'ancien marqueur s'il existe
                 if (userMarker) {
                     map.removeLayer(userMarker);
                 }
                 
-                // Centrer la carte sur la position de l'utilisateur
+                // Centrage de la carte sur la position
                 map.setView(userLatLng, 15);
                 
-                // Ajouter un marqueur pour la position de l'utilisateur
+                // Ajout d'un marqueur pour la position
                 userMarker = L.marker(userLatLng, {
                     icon: L.divIcon({
                         className: 'map-page__user-marker',
@@ -87,12 +101,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 }).addTo(map);
                 
-                // Mettre à jour la recherche avec les spots à proximité
+                // Mise à jour de la recherche avec les spots à proximité
                 const searchForm = document.getElementById('search-form');
                 const formData = new FormData(searchForm);
                 formData.append('latitude', userLatLng[0]);
                 formData.append('longitude', userLatLng[1]);
                 
+                // Envoi de la requête AJAX
                 fetch('/?page=map-search', {
                     method: 'POST',
                     body: formData
@@ -105,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             },
             function(error) {
+                // Gestion des erreurs de géolocalisation
                 let errorMessage;
                 switch(error.code) {
                     case error.PERMISSION_DENIED:

@@ -1,6 +1,7 @@
 <?php 
 require_once __DIR__ . '/partials/header.php';
 
+// Récupération des erreurs et anciennes valeurs depuis la session
 $profileErrors = $_SESSION['profile_errors'] ?? [];
 $passwordErrors = $_SESSION['password_errors'] ?? [];
 $oldProfile = $_SESSION['old_profile'] ?? [];
@@ -12,6 +13,7 @@ unset($_SESSION['old_profile']);
 <div class="profile">
     <h1 class="profile__title">Mon Profil</h1>
     
+    <!-- Affichage des messages de succès -->
     <?php if (isset($_SESSION['success'])): ?>
         <div class="profile__alert profile__alert--success">
             <?= htmlspecialchars($_SESSION['success']) ?>
@@ -22,6 +24,7 @@ unset($_SESSION['old_profile']);
     <div class="profile__content">
         <div class="profile__info">
             
+            <!-- Affichage des erreurs de profil -->
             <?php if (!empty($profileErrors)): ?>
                 <div class="profile__alert profile__alert--error">
                     <?php foreach ($profileErrors as $error): ?>
@@ -30,10 +33,12 @@ unset($_SESSION['old_profile']);
                 </div>
             <?php endif; ?>
 
+            <!-- Section photo de profil -->
             <div class="profile__picture-section">
                 <h3 class="profile__picture-title">Photo de profil</h3>
                 <div class="profile__current-picture">
                     <?php
+                    // Récupération de la photo de profil
                     $profilePicture = $userModel->getProfilePicture($_SESSION['user_id']);
                     $picturePath = $profilePicture 
                         ? '/uploads/profiles/' . htmlspecialchars($profilePicture)
@@ -42,6 +47,7 @@ unset($_SESSION['old_profile']);
                     <img src="<?= $picturePath ?>" alt="Photo de profil" class="profile__img">
                 </div>
                 
+                <!-- Formulaire de changement de photo -->
                 <form action="/actions/upload-profile-picture.php" method="POST" enctype="multipart/form-data" class="profile__upload-form">
                     <div class="profile__form-group">
                         <label for="profile_picture" class="profile__label">Changer de photo</label>
@@ -52,6 +58,7 @@ unset($_SESSION['old_profile']);
                 </form>
             </div>
 
+            <!-- Formulaire de modification du profil -->
             <form action="/actions/edit-profile.php" method="POST" class="profile__form">
                 <div class="profile__form-group">
                     <label for="username" class="profile__label">Nom d'utilisateur</label>
@@ -68,9 +75,11 @@ unset($_SESSION['old_profile']);
                 <button type="submit" class="profile__submit">Mettre à jour</button>
             </form>
             
+            <!-- Section changement de mot de passe -->
             <div class="profile__password">
                 <h3 class="profile__password-title">Changer le mot de passe</h3>
                 
+                <!-- Affichage des erreurs de mot de passe -->
                 <?php if (!empty($passwordErrors)): ?>
                     <div class="profile__alert profile__alert--error">
                         <?php foreach ($passwordErrors as $error): ?>
@@ -79,6 +88,7 @@ unset($_SESSION['old_profile']);
                     </div>
                 <?php endif; ?>
                 
+                <!-- Formulaire de changement de mot de passe -->
                 <form action="/actions/change-password.php" method="POST" class="profile__password-form">
                     <div class="profile__form-group">
                         <label for="current_password" class="profile__label">Mot de passe actuel</label>

@@ -1,16 +1,16 @@
 <?php
 require_once __DIR__ . '/partials/header.php';
 
-// Vérifier si le spot existe
+// Vérification de l'existence du spot WiFi
 if (!isset($spot)) {
     header('Location: /?page=not_found');
     exit;
 }
 
-// Masquer les favoris pour les admins
+// Masquer la fonctionnalité favoris pour les admins
 $showFavorites = isset($_SESSION['user_id']) && $_SESSION['role'] !== 'admin';
 
-// Récupérer 3 spots à proximité
+// Récupération des spots à proximité (3 max dans un rayon de 1km)
 $nearbySpots = $wifiSpotModel->getNearbySpots(
     $spot['latitude'],
     $spot['longitude'],
@@ -20,7 +20,9 @@ $nearbySpots = $wifiSpotModel->getNearbySpots(
 );
 ?>
 
+<!-- Début de la page de détail d'un spot -->
 <div class="spot-detail">
+    <!-- En-tête avec nom du spot et statut -->
     <div class="spot-detail__header">
         <h1 class="spot-detail__title"><?= htmlspecialchars($spot['site_name']) ?></h1>
         <p class="spot-detail__status spot-detail__status--<?= strtolower(str_replace(' ', '-', $spot['status'])) ?>">
@@ -28,8 +30,11 @@ $nearbySpots = $wifiSpotModel->getNearbySpots(
         </p>
     </div>
     
+    <!-- Contenu principal -->
     <div class="spot-detail__content">
+        <!-- Section informations -->
         <div class="spot-detail__info">
+            <!-- Adresse -->
             <div class="spot-detail__section">
                 <h2 class="spot-detail__section-title">Adresse</h2>
                 <p class="spot-detail__text"><?= htmlspecialchars($spot['address']) ?></p>
@@ -37,6 +42,7 @@ $nearbySpots = $wifiSpotModel->getNearbySpots(
                 <p class="spot-detail__text"><?= $spot['arrondissement'] ?>e Arrondissement</p>
             </div>
             
+            <!-- Informations techniques -->
             <div class="spot-detail__section">
                 <h2 class="spot-detail__section-title">Informations</h2>
                 <p class="spot-detail__text"><strong>Type :</strong> <?= htmlspecialchars($spot['site_type']) ?></p>
@@ -46,6 +52,7 @@ $nearbySpots = $wifiSpotModel->getNearbySpots(
                 <?php endif; ?>
             </div>
             
+            <!-- Carte et coordonnées -->
             <div class="spot-detail__section">
                 <h2 class="spot-detail__section-title">Coordonnées</h2>
                 <div id="detail-map" class="spot-detail__map"></div>
@@ -56,8 +63,10 @@ $nearbySpots = $wifiSpotModel->getNearbySpots(
             </div>
         </div>
         
+        <!-- Actions possibles -->
         <div class="spot-detail__actions">
             <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] !== 'admin'): ?>
+                <!-- Bouton favori (uniquement pour les non-admins) -->
                 <button class="spot-detail__favorite-btn <?= $isFavorite ? 'spot-detail__favorite-btn--active' : '' ?>" 
                         data-spot-id="<?= $spot['id'] ?>"
                         id="favorite-button">
@@ -68,6 +77,7 @@ $nearbySpots = $wifiSpotModel->getNearbySpots(
         </div>
     </div>
 
+    <!-- Section des spots recommandés à proximité -->
     <?php if (!empty($nearbySpots)): ?>
         <div class="spot-detail__recommendations">
             <h2 class="spot-detail__recommendations-title">Spots à proximité</h2>
@@ -89,7 +99,7 @@ $nearbySpots = $wifiSpotModel->getNearbySpots(
 </div>
 
 <script>
-// Données pour la carte
+// Données du spot pour la carte
 const spotData = {
     id: <?= json_encode($spot['id']) ?>,
     site_name: <?= json_encode($spot['site_name']) ?>,
@@ -105,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (favoriteButton) {
         favoriteButton.addEventListener('click', function() {
+            // Redirection si non connecté
             if (!<?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>) {
                 window.location.href = '/?page=login';
                 return;
@@ -114,6 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData();
             formData.append('spot_id', spotId);
 
+            // Requête AJAX pour toggle le favori
             fetch('/actions/toggle-favorite.php', {
                 method: 'POST',
                 body: formData
@@ -129,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 if (!data.error) {
-                    // Mettre à jour le bouton
+                    // Mise à jour visuelle du bouton
                     this.classList.toggle('spot-detail__favorite-btn--active');
                     this.innerHTML = data.is_favorite 
                         ? '♥ Retirer des favoris' 
@@ -144,6 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- Inclusion des scripts nécessaires -->
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script src="/assets/js/map.js"></script>
 

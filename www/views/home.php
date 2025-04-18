@@ -1,14 +1,20 @@
-<?php require_once __DIR__ . '/partials/header.php'; ?>
+<?php 
+// Inclure l'en-tête de la page
+require_once __DIR__ . '/partials/header.php'; 
+?>
 
 <div class="home">
+    <!-- Section Hero (bannière principale) -->
     <div class="home__hero">
         <div class="home__hero-content">
             <h1 class="home__hero-title">Bienvenue sur <span class="home__hero-highlight">Pause WiFi</span></h1>
             <p class="home__hero-subtitle">Trouvez les meilleurs spots WiFi gratuits à Paris</p>
             <div class="home__hero-actions">
+                <!-- Bouton principal vers la carte -->
                 <a href="/?page=map" class="home__hero-btn home__hero-btn--primary">
                     <i class="fas fa-map-marker-alt"></i> Voir la carte interactive
                 </a>
+                <!-- Bouton secondaire vers la liste -->
                 <a href="/?page=list" class="home__hero-btn home__hero-btn--secondary">
                     <i class="fas fa-list"></i> Explorer tous les spots
                 </a>
@@ -19,6 +25,7 @@
         </div>
     </div>
 
+    <!-- Section Statistiques -->
     <div class="home__stats">
         <div class="home__stat-item">
             <div class="home__stat-number">200+</div>
@@ -34,6 +41,7 @@
         </div>
     </div>
 
+    <!-- Section Fonctionnalités -->
     <div class="home__features">
         <div class="home__feature">
             <div class="home__feature-icon">
@@ -58,6 +66,7 @@
         </div>
     </div>
 
+    <!-- Section Call-to-Action (incitation à l'action) -->
     <div class="home__cta">
         <h2 class="home__cta-title">
             <?php if (isset($_SESSION['user_id'])): ?>
@@ -73,10 +82,14 @@
                 Rejoignez notre communauté et découvrez les meilleurs endroits pour vous connecter à Paris.
             <?php endif; ?>
         </p>
+        <!-- Bouton CTA différent selon si l'utilisateur est connecté ou non -->
         <a href="/?page=<?= isset($_SESSION['user_id']) ? 'map' : 'register' ?>" class="home__cta-btn">
             <?= isset($_SESSION['user_id']) ? 'Voir la carte' : 'Créer un compte' ?>
         </a>
     </div>
 </div>
 
-<?php require_once __DIR__ . '/partials/footer.php'; ?>
+<?php 
+// Inclure le pied de page
+require_once __DIR__ . '/partials/footer.php'; 
+?>

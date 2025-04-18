@@ -1,6 +1,8 @@
 <?php 
+// Inclure l'en-tête de la page
 require_once __DIR__ . '/partials/header.php';
 
+// Afficher un message si l'utilisateur n'a pas de favoris
 if (empty($favorites)): ?>
     <div class="favorites">
         <h1 class="favorites__title">Mes Favoris</h1>
@@ -8,6 +10,7 @@ if (empty($favorites)): ?>
         <a href="/?page=list" class="favorites__explore-btn">Explorer les spots</a>
     </div>
 <?php else: ?>
+    <!-- Liste des favoris -->
     <div class="favorites">
         <h1 class="favorites__title">Mes Favoris</h1>
         
@@ -28,6 +31,7 @@ if (empty($favorites)): ?>
             <?php endforeach; ?>
         </div>
 
+        <!-- Pagination si nécessaire -->
         <?php if ($totalPages > 1): ?>
             <div class="favorites__pagination">
                 <?php if ($pageNumber > 1): ?>
@@ -49,18 +53,20 @@ if (empty($favorites)): ?>
 <?php endif; ?>
 
 <script>
+// Gestion des interactions JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    // Vérification de la connexion utilisateur
+    // Vérifier si l'utilisateur est connecté
     function isUserLoggedIn() {
         return document.cookie.includes('PHPSESSID') || <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
     }
 
-    // Gestionnaire d'événement pour les boutons de suppression
+    // Gestion du clic sur le bouton "Retirer des favoris"
     document.querySelectorAll('.favorites__remove-btn').forEach(button => {
         button.addEventListener('click', async function(e) {
             e.preventDefault();
             e.stopPropagation();
             
+            // Rediriger vers la page de connexion si non connecté
             if (!isUserLoggedIn()) {
                 window.location.href = '/?page=login';
                 return;
@@ -74,9 +80,11 @@ document.addEventListener('DOMContentLoaded', function() {
             buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
 
             try {
+                // Préparation des données pour la requête AJAX
                 const formData = new FormData();
                 formData.append('spot_id', spotId);
                 
+                // Envoi de la requête au serveur
                 const response = await fetch('/actions/toggle-favorite.php', {
                     method: 'POST',
                     body: formData,
@@ -93,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error(data.error);
                 }
 
+                // Si la suppression a réussi
                 if (data.success && data.is_favorite === false) {
                     // Supprimer l'élément du DOM
                     const spotElement = document.getElementById(`favorite-spot-${spotId}`);
@@ -120,4 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php require_once __DIR__ . '/partials/footer.php'; ?>
+<?php 
+// Inclure le pied de page
+require_once __DIR__ . '/partials/footer.php'; 
+?>

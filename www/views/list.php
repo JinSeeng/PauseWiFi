@@ -1,13 +1,19 @@
-<?php require_once __DIR__ . '/partials/header.php'; ?>
+<?php 
+// Inclure l'en-tête de la page
+require_once __DIR__ . '/partials/header.php'; 
+?>
 
 <div class="spots-list">
+    <!-- Section Filtres et recherche -->
     <div class="spots-list__filters">
         <form id="search-form" class="spots-list__search-form">
+            <!-- Champ de recherche -->
             <input type="text" name="search" class="spots-list__search-input" 
                    placeholder="Rechercher par nom ou adresse..." 
                    value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
             
             <div class="spots-list__filter-row">
+                <!-- Filtre par type de lieu -->
                 <select name="site_type" class="spots-list__filter">
                     <option value="all">Tous les types</option>
                     <?php 
@@ -19,6 +25,7 @@
                     <?php endforeach; ?>
                 </select>
                 
+                <!-- Filtre par arrondissement -->
                 <select name="arrondissement" class="spots-list__filter">
                     <option value="all">Tous les arrondissements</option>
                     <?php for ($i = 1; $i <= 20; $i++): ?>
@@ -28,6 +35,7 @@
                     <?php endfor; ?>
                 </select>
                 
+                <!-- Filtre par statut -->
                 <select name="status" class="spots-list__filter">
                     <option value="all">Tous les statuts</option>
                     <?php 
@@ -40,6 +48,7 @@
                 </select>
             </div>
             
+            <!-- Boutons d'action -->
             <button type="submit" class="spots-list__search-btn">Rechercher</button>
             <button type="button" id="locate-me" class="spots-list__locate-btn">
                 <i class="fas fa-location-arrow"></i> Spots près de moi
@@ -47,14 +56,18 @@
         </form>
     </div>
 
+    <!-- Résultats de la recherche -->
     <div id="spots-list" class="spots-list__results">
         <?php if (empty($spots)): ?>
+            <!-- Message si aucun résultat -->
             <div class="spots-list__empty">
                 <p class="spots-list__empty-text">Aucun spot WiFi trouvé avec ces critères.</p>
             </div>
         <?php else: ?>
+            <!-- Liste des spots -->
             <?php foreach ($spots as $spot): ?>
                 <div class="spots-list__item">
+                    <!-- Informations du spot -->
                     <div class="spots-list__item-info">
                         <h2 class="spots-list__item-title"><?= htmlspecialchars($spot['site_name']) ?></h2>
                         <p class="spots-list__item-address"><?= htmlspecialchars($spot['address']) ?></p>
@@ -64,9 +77,11 @@
                         <?php endif; ?>
                     </div>
                     
+                    <!-- Actions possibles sur le spot -->
                     <div class="spots-list__item-actions">
                         <a href="/?page=spot&id=<?= $spot['id'] ?>" class="spots-list__details-btn">Voir détails</a>
                         <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] !== 'admin'): ?>
+                            <!-- Bouton favori (coeur) -->
                             <button class="spots-list__favorite-btn <?= $favoriteModel->isFavorite($_SESSION['user_id'], $spot['id']) ? 'spots-list__favorite-btn--active' : '' ?>" 
                                     data-spot-id="<?= $spot['id'] ?>">
                                 ♥
@@ -80,8 +95,9 @@
 </div>
 
 <script>
+// Scripts JavaScript pour la page de liste
 document.addEventListener('DOMContentLoaded', function() {
-    // Déléguer les événements de favoris
+    // Gestion des clics sur les boutons favoris
     document.addEventListener('click', function(e) {
         const btnFavorite = e.target.closest('.spots-list__favorite-btn');
         if (btnFavorite) {
@@ -90,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Récupération des éléments DOM
     const searchForm = document.getElementById('search-form');
     const spotsList = document.getElementById('spots-list');
     const locateBtn = document.getElementById('locate-me');
@@ -114,11 +131,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Affichage d'un indicateur de chargement
         locateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Localisation...';
         locateBtn.disabled = true;
         
+        // Récupération de la position géographique
         navigator.geolocation.getCurrentPosition(
             position => {
+                // Construction des paramètres de recherche
                 const params = new URLSearchParams();
                 const formData = new FormData(searchForm);
                 
@@ -128,9 +148,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
+                // Ajout des coordonnées GPS
                 params.append('latitude', position.coords.latitude);
                 params.append('longitude', position.coords.longitude);
                 
+                // Requête AJAX pour récupérer les spots proches
                 fetch(`/?page=search&${params.toString()}`, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
@@ -139,17 +161,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     updateSearchResults(data);
+                    // Mise à jour de l'URL
                     window.history.pushState({}, '', `/?page=list&${params.toString()}`);
                 })
                 .catch(error => {
                     console.error('Error:', error);
                 })
                 .finally(() => {
+                    // Réinitialisation du bouton
                     locateBtn.innerHTML = '<i class="fas fa-location-arrow"></i> Spots près de moi';
                     locateBtn.disabled = false;
                 });
             },
             error => {
+                // Gestion des erreurs de géolocalisation
                 let errorMessage = "Impossible d'obtenir votre position";
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
@@ -169,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     });
     
+    // Fonction pour gérer le clic sur un favori
     function handleFavoriteClick(button) {
         if (!isUserLoggedIn()) {
             window.location.href = '/?page=login';
@@ -179,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('spot_id', spotId);
 
+        // Envoi de la requête AJAX
         fetch('/actions/toggle-favorite.php', {
             method: 'POST',
             body: formData
@@ -194,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (!data.error) {
+                // Mise à jour de l'apparence du bouton
                 button.classList.toggle('spots-list__favorite-btn--active', data.is_favorite);
             }
         })
@@ -202,16 +230,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Fonction pour effectuer une recherche
     function performSearch() {
         const formData = new FormData(searchForm);
         const params = new URLSearchParams();
         
+        // Construction des paramètres
         for (const [key, value] of formData.entries()) {
             if (value && value !== 'all') {
                 params.append(key, value);
             }
         }
         
+        // Requête AJAX
         fetch(`/?page=search&${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -220,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             updateSearchResults(data);
+            // Mise à jour de l'URL
             window.history.pushState({}, '', `/?page=list&${params.toString()}`);
         })
         .catch(error => {
@@ -227,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Fonction pour mettre à jour les résultats de recherche
     function updateSearchResults(spots, isAdmin = false) {
         if (spots.length === 0) {
             spotsList.innerHTML = `
@@ -239,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
             spots.forEach(spot => {
                 const isUserAllowed = <?= isset($_SESSION['user_id']) && !$userModel->isAdmin($_SESSION['user_id']) ? 'true' : 'false' ?>;
                 
+                // Construction du HTML pour chaque spot
                 html += `
                     <div class="spots-list__item">
                         <div class="spots-list__item-info">
@@ -263,6 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Fonction pour échapper les caractères HTML
     function escapeHtml(unsafe) {
         return unsafe
             .replace(/&/g, "&amp;")
@@ -272,10 +307,12 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, "&#039;");
     }
     
+    // Fonction pour vérifier si l'utilisateur est connecté
     function isUserLoggedIn() {
         return document.querySelector('.header__user') !== null;
     }
 
+    // Fonction pour afficher des alertes
     function showAlert(type, message) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type}`;
@@ -290,4 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php require_once __DIR__ . '/partials/footer.php'; ?>
+<?php 
+// Inclure le pied de page
+require_once __DIR__ . '/partials/footer.php'; 
+?>

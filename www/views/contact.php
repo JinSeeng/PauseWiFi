@@ -1,13 +1,16 @@
 <?php 
+// Inclure l'en-tête de la page
 require_once __DIR__ . '/partials/header.php';
 
+// Traitement du formulaire de contact
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupération et nettoyage des données du formulaire
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $message = trim($_POST['message']);
     $errors = [];
 
-    // Validation
+    // Validation des champs
     if (empty($name)) {
         $errors[] = "Le nom est requis";
     }
@@ -22,19 +25,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Le message est requis";
     }
 
+    // Si pas d'erreurs, envoyer l'email
     if (empty($errors)) {
-        // Envoyer l'email (à configurer selon votre environnement)
+        // Configuration de l'email
         $to = 'admin@pause-wifi.fr';
         $subject = 'Nouveau message de contact - Pause WiFi';
         $headers = "From: $email\r\n";
         $headers .= "Reply-To: $email\r\n";
         $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
+        // Construction du corps du message
         $emailBody = "Nom: $name\n";
         $emailBody .= "Email: $email\n\n";
         $emailBody .= "Message:\n$message";
 
+        // Envoi de l'email
         if (mail($to, $subject, $emailBody, $headers)) {
+            // Message de succès
             $_SESSION['contact_success'] = "Votre message a bien été envoyé !";
             header('Location: /?page=contact');
             exit;
@@ -48,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="contact">
     <h1 class="contact__title">Contactez-nous</h1>
     
+    <!-- Affichage des messages de succès -->
     <?php if (isset($_SESSION['contact_success'])): ?>
         <div class="contact__alert contact__alert--success">
             <?= htmlspecialchars($_SESSION['contact_success']) ?>
@@ -55,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php endif; ?>
     
+    <!-- Affichage des erreurs -->
     <?php if (!empty($errors)): ?>
         <div class="contact__alert contact__alert--error">
             <?php foreach ($errors as $error): ?>
@@ -63,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php endif; ?>
     
+    <!-- Formulaire de contact -->
     <form action="/?page=contact" method="POST" class="contact__form">
         <div class="contact__form-group">
             <label for="name" class="contact__label">Votre nom</label>
@@ -87,4 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 </div>
 
-<?php require_once __DIR__ . '/partials/footer.php'; ?>
+<?php 
+// Inclure le pied de page
+require_once __DIR__ . '/partials/footer.php'; 
+?>

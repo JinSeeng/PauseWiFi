@@ -1,17 +1,22 @@
 <?php
+// Inclure l'en-tête et vérifier les permissions
 require_once __DIR__ . '/partials/header.php';
 
+// Vérifier si l'utilisateur est connecté et est admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: /?page=login');
     exit;
 }
 
+// Vérifier si l'ID du spot est valide
 if (!isset($_GET['id']) || !$spot = $wifiSpotModel->getSpotById($_GET['id'])) {
     header('Location: /?page=admin');
     exit;
 }
 
+// Traitement du formulaire de mise à jour
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Préparation des données pour la mise à jour
     $data = [
         'site_name' => $_POST['site_name'],
         'site_type' => $_POST['site_type'],
@@ -25,13 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'arrondissement' => (int)$_POST['arrondissement']
     ];
     
+    // Tentative de mise à jour du spot
     if ($wifiSpotModel->updateSpot($spot['id'], $data)) {
+        // Journaliser l'activité
         $activityLog->logAction(
             $_SESSION['user_id'],
             'spot_updated',
             'Spot mis à jour ID: ' . $spot['id'],
             $_SERVER['REMOTE_ADDR']
         );
+        
+        // Redirection avec message de succès
         $_SESSION['success'] = "Spot mis à jour avec succès";
         header('Location: /?page=admin');
         exit;
@@ -44,16 +53,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="edit-spot">
     <h1 class="edit-spot__title">Éditer le spot WiFi</h1>
     
+    <!-- Affichage des erreurs -->
     <?php if (isset($error)): ?>
         <div class="edit-spot__alert edit-spot__alert--error">
             <?= htmlspecialchars($error) ?>
         </div>
     <?php endif; ?>
     
+    <!-- Formulaire d'édition -->
     <form action="/?page=edit-spot&id=<?= $spot['id'] ?>" method="POST" class="edit-spot__form">
+        <!-- Informations de base -->
         <div class="edit-spot__form-group">
             <label for="site_name" class="edit-spot__label">Nom du site *</label>
-            <input type="text" id="site_name" name="site_name" class="edit-spot__input" value="<?= htmlspecialchars($spot['site_name']) ?>" required>
+            <input type="text" id="site_name" name="site_name" class="edit-spot__input" 
+                   value="<?= htmlspecialchars($spot['site_name']) ?>" required>
         </div>
         
         <div class="edit-spot__form-group">
@@ -71,13 +84,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="edit-spot__form-group">
             <label for="address" class="edit-spot__label">Adresse *</label>
-            <input type="text" id="address" name="address" class="edit-spot__input" value="<?= htmlspecialchars($spot['address']) ?>" required>
+            <input type="text" id="address" name="address" class="edit-spot__input" 
+                   value="<?= htmlspecialchars($spot['address']) ?>" required>
         </div>
         
+        <!-- Code postal et arrondissement -->
         <div class="edit-spot__form-row">
             <div class="edit-spot__form-group">
                 <label for="postal_code" class="edit-spot__label">Code postal *</label>
-                <input type="text" id="postal_code" name="postal_code" class="edit-spot__input" value="<?= htmlspecialchars($spot['postal_code']) ?>" required>
+                <input type="text" id="postal_code" name="postal_code" class="edit-spot__input" 
+                       value="<?= htmlspecialchars($spot['postal_code']) ?>" required>
             </div>
             
             <div class="edit-spot__form-group">
@@ -90,30 +106,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
         
+        <!-- Détails techniques -->
         <div class="edit-spot__form-row">
             <div class="edit-spot__form-group">
                 <label for="site_code" class="edit-spot__label">Code site</label>
-                <input type="text" id="site_code" name="site_code" class="edit-spot__input" value="<?= htmlspecialchars($spot['site_code'] ?? '') ?>">
+                <input type="text" id="site_code" name="site_code" class="edit-spot__input" 
+                       value="<?= htmlspecialchars($spot['site_code'] ?? '') ?>">
             </div>
             
             <div class="edit-spot__form-group">
                 <label for="num_bornes" class="edit-spot__label">Nombre de bornes</label>
-                <input type="number" id="num_bornes" name="num_bornes" min="1" class="edit-spot__input" value="<?= $spot['num_bornes'] ?>">
+                <input type="number" id="num_bornes" name="num_bornes" min="1" class="edit-spot__input" 
+                       value="<?= $spot['num_bornes'] ?>">
             </div>
         </div>
         
+        <!-- Coordonnées géographiques -->
         <div class="edit-spot__form-row">
             <div class="edit-spot__form-group">
                 <label for="latitude" class="edit-spot__label">Latitude *</label>
-                <input type="text" id="latitude" name="latitude" class="edit-spot__input" value="<?= $spot['latitude'] ?>" required>
+                <input type="text" id="latitude" name="latitude" class="edit-spot__input" 
+                       value="<?= $spot['latitude'] ?>" required>
             </div>
             
             <div class="edit-spot__form-group">
                 <label for="longitude" class="edit-spot__label">Longitude *</label>
-                <input type="text" id="longitude" name="longitude" class="edit-spot__input" value="<?= $spot['longitude'] ?>" required>
+                <input type="text" id="longitude" name="longitude" class="edit-spot__input" 
+                       value="<?= $spot['longitude'] ?>" required>
             </div>
         </div>
         
+        <!-- Statut du spot -->
         <div class="edit-spot__form-group">
             <label for="status" class="edit-spot__label">Statut *</label>
             <select id="status" name="status" class="edit-spot__select" required>
@@ -124,9 +147,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </select>
         </div>
         
+        <!-- Boutons d'action -->
         <button type="submit" class="edit-spot__submit">Mettre à jour</button>
         <a href="/?page=admin" class="edit-spot__cancel">Annuler</a>
     </form>
 </div>
 
-<?php require_once __DIR__ . '/partials/footer.php'; ?>
+<?php 
+// Inclure le pied de page
+require_once __DIR__ . '/partials/footer.php'; 
+?>
