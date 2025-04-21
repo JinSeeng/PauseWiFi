@@ -25,7 +25,15 @@ $currentPage = $_GET['page'] ?? 'home';
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/auth.css">
     <link rel="stylesheet" href="/assets/css/map.css">
-    <!-- ... autres CSS ... -->
+    <link rel="stylesheet" href="/assets/css/list.css">
+    <link rel="stylesheet" href="/assets/css/spot-detail.css">
+    <link rel="stylesheet" href="/assets/css/favorites.css">
+    <link rel="stylesheet" href="/assets/css/about.css">
+    <link rel="stylesheet" href="/assets/css/contact.css">
+    <link rel="stylesheet" href="/assets/css/admin.css">
+    <link rel="stylesheet" href="/assets/css/edit-spot.css">
+    <link rel="stylesheet" href="/assets/css/not_found.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
     
     <!-- Librairies externes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
