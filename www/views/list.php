@@ -4,6 +4,9 @@ require_once __DIR__ . '/partials/header.php';
 ?>
 
 <div class="spots-list">
+    <div class="spots-list__header">
+        <h1 class="spots-list__title">Liste des spots WiFi</h1>
+    </div>
     <!-- Section Filtres et recherche -->
     <div class="spots-list__filters">
         <form id="search-form" class="spots-list__search-form">

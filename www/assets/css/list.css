@@ -7,6 +7,18 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
+.spots-list__header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.spots-list__title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
 .spots-list__filters {
     margin-bottom: 2.5rem;
 }

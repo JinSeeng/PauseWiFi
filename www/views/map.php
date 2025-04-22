@@ -1,6 +1,9 @@
 <?php require_once __DIR__ . '/partials/header.php'; ?>
 
 <div class="map-page">
+    <div class="map-page__header">
+        <h1 class="map-page__title">Carte intéractive</h1>
+    </div>
     <!-- Section des filtres de recherche -->
     <div class="map-page__filters">
         <form id="search-form" class="map-page__search-form">
