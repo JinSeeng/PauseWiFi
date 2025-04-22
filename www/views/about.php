@@ -41,12 +41,12 @@ require_once __DIR__ . '/partials/header.php';
     <section class="about__section">
         <h2 class="about__section-title">Pour qui est-ce utile ?</h2>
         <p class="about__section-text">
-            Pause Wi-Fi s'adresse à :
+            Pause Wi-Fi s'adresse aux :
         </p>
         <ul class="about__section-text">
-            <li>Les <strong>étudiants</strong> en quête d'un lieu pour travailler en ligne</li>
-            <li>Les <strong>freelances ou télétravailleurs</strong> souhaitant une connexion fiable</li>
-            <li>Les <strong>touristes et habitants</strong> qui veulent se connecter gratuitement en ville</li>
+            <li><strong>Étudiants</strong> en quête d'un lieu pour travailler en ligne</li>
+            <li><strong>Freelances ou télétravailleurs</strong> souhaitant une connexion fiable</li>
+            <li><strong>Touristes et habitants</strong> qui veulent se connecter gratuitement en ville</li>
         </ul>
     </section>
 
