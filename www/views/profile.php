@@ -47,11 +47,11 @@ unset($_SESSION['old_profile']);
                     <img src="<?= $picturePath ?>" alt="Photo de profil" class="profile__img">
                 </div>
                 
-                <!-- Formulaire de changement de photo -->
+                <!-- Formulaire de changement de photo avec input stylisé -->
                 <form action="/actions/upload-profile-picture.php" method="POST" enctype="multipart/form-data" class="profile__upload-form">
                     <div class="profile__form-group">
-                        <label for="profile_picture" class="profile__label">Changer de photo</label>
                         <input type="file" id="profile_picture" name="profile_picture" class="profile__file-input" accept="image/jpeg,image/png,image/gif">
+                        <label for="profile_picture">Choisir une photo</label>
                         <small class="profile__file-hint">Formats acceptés : JPG, PNG, GIF (max 2MB)</small>
                     </div>
                     <button type="submit" class="profile__submit">Mettre à jour</button>
@@ -60,6 +60,7 @@ unset($_SESSION['old_profile']);
 
             <!-- Formulaire de modification du profil -->
             <form action="/actions/edit-profile.php" method="POST" class="profile__form">
+                <h3 class="profile__picture-title">Informations personnelles</h3>
                 <div class="profile__form-group">
                     <label for="username" class="profile__label">Nom d'utilisateur</label>
                     <input type="text" id="username" name="username" class="profile__input" 
