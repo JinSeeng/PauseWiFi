@@ -7,7 +7,7 @@ Le projet utilise une architecture MVC modifiée et s'appuie sur un jeu de donn�
 
 ## Accès au site
 
-Le site est accessible à l'adresse suivante : [https://sellianade.alwaysdata.net](https://sellianade.alwaysdata.net)
+Le site est accessible à l'adresse suivante : [Pause WiFi](https://sellianade.alwaysdata.net/pause_wifi)
 
 ---
 
